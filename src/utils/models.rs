@@ -12,19 +12,35 @@ pub struct PxollyData {
     pub payload: Option<String>,
     pub expired: Option<i64>,
     pub group_id: Option<i64>,
+    pub style: Option<String>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct PxollyEvent {
     #[serde(rename = "type")]
-    pub ctype: String,
+    pub c_type: String,
     pub secret_key: String,
     pub object: PxollyData,
 }
 
 pub enum PxollyResponse {
-    Success = 1,
-    Fail = 0,
-    UnknownErrorOrError = -1,
-    UnknownUIDOrNoSupport = -2,
+    ConfirmationCode(String),
+    Success,
+    Fail,
+    UnknownErrorOrError,
+    UnknownUIDOrNoSupport,
+    Locked,
+}
+
+impl ToString for PxollyResponse {
+    fn to_string(&self) -> String {
+        match self {
+            Self::ConfirmationCode(code) => &*code,
+            Self::Success => "1",
+            Self::Fail => "0",
+            Self::UnknownErrorOrError => "-1",
+            Self::UnknownUIDOrNoSupport => "-2",
+            Self::Locked => "locked",
+        }.to_string()
+    }
 }

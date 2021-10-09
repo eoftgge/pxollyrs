@@ -1,6 +1,0 @@
-auto_connect = true
-port = 1555
-
-secret_key = "gagagaga123"
-pxolly_token = "84f6...."
-access_token = "bae...."

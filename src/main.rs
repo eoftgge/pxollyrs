@@ -1,48 +1,41 @@
-mod api_context;
-mod chat_data;
-mod error;
-mod events;
-mod handlers;
-mod settings;
-mod tools;
+use axum::{
+    Router,
+    handler::post,
+    AddExtensionLayer
+};
+use std::net::SocketAddr;
+use std::str::FromStr;
+use pxollyrs::utils::{config::PxollyConfig, database::DatabaseJSON, PxollyTools};
+use pxollyrs::api::client::APIClient;
+use pxollyrs::routers::handle;
+use pxollyrs::routers::handler::PxollyHandler;
 
-use actix_web::{web, App, HttpServer};
-use api_context::APIClient;
-
-const ERROR_SETTINGS: &'static str = r#"
-Произошла ошибка при получении настроек файла 'settings.toml'. Возможно он не существует.
+const ERROR_CONFIG: &'static str = r#"
+Произошла ошибка при получении настроек файла 'conf/config.toml'. Возможно он не существует.
 "#;
 
-#[actix_web::main]
-async fn main() -> anyhow::Result<()> {
-    env_logger::builder()
-        .filter_level(log::LevelFilter::Info)
-        .init();
+#[tokio::main]
+async fn main() {
+    simple_logger::init_with_level(log::Level::Info).unwrap();
 
-    // clone...
-    let settings = settings::Settings::new().expect(&*ERROR_SETTINGS);
-    let api_ctx = APIClient::new((&settings).access_token.clone(), 5.122);
-    let chat = chat_data::WorkChatData::with("chats").await?;
-    let ip = format!("{}:{}", tools::ip().await?, settings.port.clone());
-    let app_settings = settings.clone();
+    let config = PxollyConfig::new().expect(&*ERROR_CONFIG);
+    let api_client = APIClient::new(config.access_token.to_owned(), 5.122);
+    let database = DatabaseJSON::with("chats").await.expect("Ошибка при подключении базы данных на JSON");
+    let tools = PxollyTools::new(config).await.expect("Что-то пошло не так...");
+    let handler = PxollyHandler {
+        api_client,
+        database,
+        tools: tools.clone()
+    };
+    let router = Router::new().route("/", post(handle)).layer(AddExtensionLayer::new(handler));
+    // по судя всему axum не использует Arc. надо бы добавить
+    let addr = SocketAddr::from_str(&*tools.get_ip()).expect("При получении айпи произошла неизвестная ошибка");
 
-    println!("IP = {};", ip);
-    let server = HttpServer::new(move || {
-        App::new()
-            .app_data(chat.clone())
-            .app_data(api_ctx.clone())
-            .app_data(app_settings.clone())
-            .route("/", web::post().to(handlers::index))
-    })
-    .bind(ip.clone()).expect("В вашем провайдере отсутствует белый адрес.");
+    log::info!("Addr: {}", addr);
+    tokio::spawn(axum::Server::bind(&addr).serve(router.into_make_service()));
+    tools.make_webhook().await.expect("При подключении вебхука что-то пошло не так.");
 
-    println!("Server is running;");
-    tokio::spawn(server.run());
-    if settings.auto_connect {
-        tools::set_webhook(&ip, &settings).await?;
-    } else {
-        loop {}
+    loop {
+
     }
-
-    Ok(())
 }

@@ -1,0 +1,6 @@
+auto_connect = true
+port = 1555
+
+secret_key = "lolkek123"
+pxolly_token = "84f..."
+access_token = "4da..."

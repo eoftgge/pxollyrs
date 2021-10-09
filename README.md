@@ -17,8 +17,9 @@ access_token = "bae..."
 > access_token: токен от вк (можно получить токен от вк по ссылке [vkhost.github.io](https://vkhost.github.io)) <br/>
 
 ### Установка
-Установка компилятора Rust (Для установки компилятора нужен curl) и запуск бота
+Для запуска бота, требуется компилятор Rust (https://www.rust-lang.org/ru/tools/install)
 
-> curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh <br/>
+Запуск бота:
+> git clone https://github.com/tkgoose/pxollyrs pxollyrs <br/>
 > cd pxollyrs/ <br/>
 > cargo run --release <br/>

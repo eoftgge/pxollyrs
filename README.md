@@ -20,6 +20,6 @@ access_token = "bae..."
 Для запуска бота, требуется компилятор Rust (https://www.rust-lang.org/ru/tools/install)
 
 Запуск бота:
-> git clone https://github.com/tkgoose/pxollyrs pxollyrs <br/>
+> git clone https://github.com/eoftgge/pxollyrs pxollyrs <br/>
 > cd pxollyrs/ <br/>
 > cargo run --release <br/>

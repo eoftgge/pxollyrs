@@ -15,12 +15,12 @@ impl PxollyConfig {
         let mut config = Config::default();
 
         config.merge(File::with_name("conf/config.toml"))?;
-        return config.try_into();
+        config.try_into()
     }
 }
 
 impl AsRef<PxollyConfig> for PxollyConfig {
     fn as_ref(&self) -> &PxollyConfig {
-        &self
+        self
     }
 }

@@ -1,9 +1,9 @@
+use crate::errors::PxollyResult;
+use serde_json::{from_str, to_string_pretty};
 use std::collections::HashMap;
 use std::path::PathBuf;
-use serde_json::{to_string_pretty, from_str};
-use tokio::fs::{OpenOptions, File};
+use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use crate::errors::PxollyResult;
 
 #[derive(Clone, Debug)]
 pub struct DatabaseJSON {
@@ -54,7 +54,7 @@ impl DatabaseJSON {
         let mut file = self.open().await?;
         file.read_to_string(&mut content).await?;
 
-        Ok(from_str(&*content).unwrap_or(HashMap::new()))
+        Ok(from_str(&*content).unwrap_or_default())
     }
 
     pub async fn insert(&self, chat_id: String, chat_uid: u64) -> PxollyResult<()> {

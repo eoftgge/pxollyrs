@@ -2,5 +2,5 @@ auto_connect = true
 port = 1555
 
 secret_key = "lolkek123"
-pxolly_token = "84f..."
+pxolly_token = "84f6dd8472cd4fb733d11bedc1d68cf90c6b9651d35b02e546f649f14659930bb416774dd7592d2e72d2"
 access_token = "4da..."

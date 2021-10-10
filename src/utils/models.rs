@@ -41,6 +41,7 @@ impl ToString for PxollyResponse {
             Self::UnknownErrorOrError => "-1",
             Self::UnknownUIDOrNoSupport => "-2",
             Self::Locked => "locked",
-        }.to_string()
+        }
+        .to_string()
     }
 }

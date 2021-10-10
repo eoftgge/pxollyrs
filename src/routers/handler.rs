@@ -27,21 +27,6 @@ impl PxollyHandler {
 		Ok(PxollyResponse::Success)
 	}
 
-	async fn delete_for_all(&self, event: PxollyEvent, chat_id: u64) -> ResultHandle {
-		let params = par! {
-			"delete_for_all": 1,
-			"peer_id": self.tools.get_peer_id(chat_id),
-			"is_spam": event.object.is_spam.ok_or_else(|| PxollyError::None)?,
-			"conversation_message_ids":
-				vec_to_string(
-					event.object.conversation_message_ids.ok_or_else(|| PxollyError::None)?
-				)
-		};
-
-		self.api_client.api_request("messages.delete", params).await?;
-		Ok(PxollyResponse::Success)
-	}
-
 	async fn invite_user(&self, event: PxollyEvent, chat_id: u64) -> ResultHandle {
 		let params = par! {
 			"visible_messages_count": event.object.visible_messages_count.unwrap_or(0),
@@ -116,7 +101,6 @@ impl PxollyHandler {
 		};
 
 		let result = match &*event.c_type {
-			"delete_for_all" => self.delete_for_all(event, chat_id).await?,
 			"invite_user" => self.invite_user(event, chat_id).await?,
 			"group_ban" => self.group_ban(event).await?,
 			"group_unban" => self.group_unban(event).await?,

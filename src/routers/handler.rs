@@ -90,7 +90,7 @@ impl PxollyHandler {
         Ok(PxollyResponse::Success)
     }
 
-    pub async fn handle(&self, event: PxollyEvent) -> PxollyResult<PxollyResponse> {
+    pub async fn handle(&self, event: PxollyEvent) -> ResultHandle {
         let chat_id = match event.object.chat_id.as_ref() {
             None if event.secret_key != self.tools.config.secret_key => {
                 return Ok(PxollyResponse::Locked)

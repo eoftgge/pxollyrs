@@ -3,7 +3,6 @@ use crate::par;
 use crate::utils::config::PxollyConfig;
 use reqwest::Client;
 use serde_json::Value;
-use std::time::Duration;
 
 pub mod config;
 pub mod database;
@@ -91,12 +90,10 @@ impl PxollyTools {
         2_000_000_000 + chat_id
     }
 
-    pub async fn make_webhook(&self) -> PxollyResult<()> {
+    pub async fn future_make_webhook(self) {
         if !self.config.auto_connect {
-            return Ok(());
+            return;
         }
-
-        tokio::time::sleep(Duration::from_secs(3)).await; // костыльно..
 
         let request_builder = self
             .client
@@ -104,12 +101,12 @@ impl PxollyTools {
             .form(&par! {
                 "url": format!("http://{}", self.get_ip()),
                 "secret_key": self.config.secret_key,
-                "access_token": self.config.pxolly_token
+                "access_token": self.config.pxolly_token,
+                "is_msgpack": 1,
             });
 
-        let response: Value = request_builder.send().await?.json().await?;
+        let response: Value = request_builder.send().await.unwrap().json().await.unwrap();
 
         log::info!("Result connect to @pxolly: {:#?}", response);
-        Ok(())
     }
 }

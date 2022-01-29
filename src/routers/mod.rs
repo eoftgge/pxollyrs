@@ -19,7 +19,9 @@ pub async fn handle(
             log::error!("An unexpected error occurred: {:?}", error);
 
             if let PxollyError::API(_) = error {
-                Ok(PxollyResponse::Fail.to_string())
+                Ok(PxollyResponse::FailAPI.to_string())
+            } else if let PxollyError::Response(response) = error {
+                Ok(response.to_string())
             } else {
                 Err((
                     StatusCode::INTERNAL_SERVER_ERROR,

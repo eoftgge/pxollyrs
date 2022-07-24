@@ -9,14 +9,14 @@ async fn main() {
     simple_logger::init_with_level(log::Level::Info).unwrap();
 
     let config = PxollyConfig::new()
-        .expect("Произошла ошибка при получении настроек файла 'conf/config.toml'. Возможно он не существует.");
+        .expect("An unknown error occurred while opening the file 'conf/config.toml'. Probably file doesn't exists.");
     let api_client = APIClient::new(config.access_token.to_owned(), "5.131");
     let database = DatabaseJSON::with("chats")
         .await
-        .expect("Ошибка при подключении базы данных на JSON.");
+        .expect("An unknown error occurred while creating the database.");
     let tools = PxollyTools::new(config)
         .await
-        .expect("При получении айпи произошла неизвестная ошибка.");
+        .expect("An unknown error occurred while getting the IP.");
     let handler = PxollyHandler {
         api_client,
         database,

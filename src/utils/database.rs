@@ -44,7 +44,7 @@ impl DatabaseJSON {
 
     async fn save(&self, chat_data: HashMap<String, u64>) -> PxollyResult<()> {
         let mut file = self.open().await?;
-        file.write(to_string_pretty(&chat_data)?.as_bytes()).await?;
+        file.write_all(to_string_pretty(&chat_data)?.as_bytes()).await?;
 
         Ok(())
     }

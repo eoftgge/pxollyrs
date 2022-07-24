@@ -15,8 +15,12 @@ pub enum PxollyError {
     Response(PxollyResponse),
     #[error("Other's error.")]
     Other(String),
-    #[error("The function/method returned none.")]
-    None,
+}
+
+impl From<&str> for PxollyError {
+    fn from(text: &str) -> Self {
+        Self::Other(text.into())
+    }
 }
 
 pub type PxollyResult<T> = Result<T, PxollyError>;

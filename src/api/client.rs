@@ -1,19 +1,20 @@
-use crate::api::response::{APIObjectResponse, APIResponse};
+use crate::api::response::APIResponse;
 use crate::errors::{PxollyError, PxollyResult};
 use reqwest::Client;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 
 #[derive(Clone)]
 pub struct APIClient {
     access_token: String,
-    version: f32,
+    version: String,  // теряется точность если хранить в f32
     client: Client,
 }
 
 impl APIClient {
-    pub fn new(access_token: impl Into<String>, version: f32) -> Self {
+    pub fn new(access_token: impl Into<String>, version: impl Into<String>) -> Self {
         Self {
-            version,
+            version: version.into(),
             access_token: access_token.into(),
             client: Client::new(),
         }
@@ -25,27 +26,35 @@ impl APIClient {
 
     pub fn make_params(&self, params: impl Serialize) -> PxollyResult<serde_json::Value> {
         let mut params = serde_json::to_value(params)?;
-        let ref_params = params.as_object_mut().ok_or(PxollyError::None)?;
+        let ref_params = params.as_object_mut().ok_or_else(|| PxollyError::from("Params isn't object"))?;
         ref_params.insert(
             "access_token".into(),
-            serde_json::Value::from(self.access_token.to_string()),
+            serde_json::Value::from(&*self.access_token),
         );
-        ref_params.insert("v".into(), serde_json::Value::from(self.version));
+        ref_params.insert("v".into(), serde_json::Value::from(&*self.version));
 
         Ok(params)
     }
 
-    pub async fn api_request(
+    pub async fn api_request<Method, Params, Response>(
         &self,
-        method: impl Into<String>,
-        params: impl Serialize,
-    ) -> PxollyResult<APIObjectResponse> {
+        method: Method,
+        params: Params,
+    ) -> PxollyResult<Response> where
+        Method: Into<String>,
+        Params: Serialize,
+        Response: DeserializeOwned
+    {
         let request_builder = self
             .client
             .post(self.make_url(method.into()))
             .form(&self.make_params(params)?);
 
-        let response = request_builder.send().await?.json::<APIResponse>().await?;
+        let response = request_builder
+            .send()
+            .await?
+            .json::<APIResponse<Response>>()
+            .await?;
 
         match response {
             APIResponse::Response(response) => Ok(response),

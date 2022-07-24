@@ -1,14 +1,7 @@
-use serde::Deserialize;
-use serde_json::{Map, Value};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
-#[derive(Deserialize, Debug)]
-#[serde(untagged)]
-pub enum APIObjectResponse {
-    Object(Map<String, Value>),
-    Integer(i64),
-}
-
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct APIError {
     pub error_code: i32,
     pub error_msg: String,
@@ -17,7 +10,7 @@ pub struct APIError {
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
-pub enum APIResponse {
-    Response(APIObjectResponse),
+pub enum APIResponse<T> {
+    Response(T),
     Error(APIError),
 }

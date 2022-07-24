@@ -1,12 +1,16 @@
-use crate::errors::{PxollyError, PxollyResult};
+use std::net::SocketAddr;
+use std::str::FromStr;
+use crate::errors::PxollyResult;
 use crate::par;
 use crate::utils::config::PxollyConfig;
 use reqwest::Client;
 use serde_json::Value;
+use crate::utils::option::ExpectedField;
 
 pub mod config;
 pub mod database;
 pub mod models;
+pub mod option;
 
 #[derive(Clone)]
 pub struct PxollyTools {
@@ -43,41 +47,62 @@ impl PxollyTools {
         let response = request_builder
             .send()
             .await?
-            .json::<serde_json::Value>()
+            .json::<Value>()
             .await?;
 
-        self.confirmation_code = Some(
-            response
-                .get("response")
-                .ok_or(PxollyError::None)?
-                .get("confirmation_code")
-                .ok_or(PxollyError::None)?
-                .as_str()
-                .ok_or(PxollyError::None)?
-                .to_string(),
-        );
+        self.confirmation_code = response
+            .get("response")
+            .expect_field("response")?
+            .get("confirmation_code")
+            .expect_field("confirmation_code")?
+            .as_str()
+            .map(|x| x.to_string());
+
         Ok(())
     }
 
     async fn set_ip(&mut self) -> PxollyResult<()> {
+        if self.config.host().is_some() {
+            return Ok(())
+        }
+
         let request_builder = self.client.get("https://httpbin.org/ip");
         let response = request_builder
             .send()
             .await?
-            .json::<serde_json::Value>()
+            .json::<Value>()
             .await?;
 
         self.ip = Some(format!(
             "{}:{}",
-            response["origin"].as_str().ok_or(PxollyError::None)?,
+            response["origin"].as_str().expect_field("origin")?,
             self.config.port
         ));
+
         Ok(())
     }
 
     #[inline]
-    pub fn get_ip(&self) -> String {
-        self.ip.as_ref().unwrap().to_string()
+    pub fn get_addr(&self) -> SocketAddr {
+        let port = self.config.port;
+
+        if self.config.host().is_some() {
+            return SocketAddr::from_str(&*format!("127.0.0.1:{}", port))
+                .expect("Error parsing SocketAddr / maybe port invalid");
+        }
+
+        let host = self.ip.as_ref().unwrap();
+
+        SocketAddr::from_str(&*format!("{}:{}", host, port))
+            .expect("Error parsing SocketAddr / maybe port invalid")
+    }
+
+    #[inline]
+    pub fn get_host(&self) -> String {
+        if let Some(host) = self.config.host() {
+            return host
+        }
+        format!("http://{}:{}", self.ip.as_ref().unwrap(), self.config.port)
     }
 
     #[inline]
@@ -90,7 +115,7 @@ impl PxollyTools {
         2_000_000_000 + chat_id
     }
 
-    pub async fn future_make_webhook(self) {
+    pub async fn make_webhook(self) {
         if !self.config.auto_connect {
             return;
         }
@@ -99,7 +124,7 @@ impl PxollyTools {
             .client
             .post("https://api.pxolly.ru/method/callback.editSettings")
             .form(&par! {
-                "url": format!("http://{}", self.get_ip()),
+                "url": self.get_host(),
                 "secret_key": self.config.secret_key,
                 "access_token": self.config.pxolly_token,
                 "is_msgpack": 1,

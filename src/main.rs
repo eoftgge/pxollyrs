@@ -3,8 +3,6 @@ use pxollyrs::api::client::APIClient;
 use pxollyrs::routers::handle;
 use pxollyrs::routers::handler::PxollyHandler;
 use pxollyrs::utils::{config::PxollyConfig, database::DatabaseJSON, PxollyTools};
-use std::net::SocketAddr;
-use std::str::FromStr;
 
 #[tokio::main]
 async fn main() {
@@ -12,7 +10,7 @@ async fn main() {
 
     let config = PxollyConfig::new()
         .expect("Произошла ошибка при получении настроек файла 'conf/config.toml'. Возможно он не существует.");
-    let api_client = APIClient::new(config.access_token.to_owned(), 5.122);
+    let api_client = APIClient::new(config.access_token.to_owned(), "5.131");
     let database = DatabaseJSON::with("chats")
         .await
         .expect("Ошибка при подключении базы данных на JSON.");
@@ -27,12 +25,13 @@ async fn main() {
     let router = Router::new()
         .route("/", post(handle))
         .layer(AddExtensionLayer::new(handler));
-    let addr = SocketAddr::from_str(&*tools.get_ip()).expect("`SocketAddr` is invalid!");
+    let addr = tools.get_addr();
 
     log::info!("Addr: {}", addr);
     log::info!("Server is starting...");
-    let _ = tokio::spawn(axum::Server::bind(&addr).serve(router.into_make_service()));
-    let _ = tokio::spawn(tools.future_make_webhook());
 
-    loop {}
+    let (_, _) = tokio::join! {
+        axum::Server::bind(&addr).serve(router.into_make_service()),
+        tools.make_webhook()
+    };
 }

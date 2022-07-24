@@ -8,6 +8,7 @@ pub struct PxollyConfig {
     pub secret_key: String,
     pub pxolly_token: String,
     pub access_token: String,
+    host: String,
 }
 
 impl PxollyConfig {
@@ -16,6 +17,13 @@ impl PxollyConfig {
 
         config.merge(File::with_name("conf/config.toml"))?;
         config.try_into()
+    }
+
+    pub fn host(&self) -> Option<String> {
+        if !self.host.is_empty() {
+            return Some(self.host.to_string())
+        };
+        None
     }
 }
 

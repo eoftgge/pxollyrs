@@ -1,5 +1,6 @@
 auto_connect = true
 port = 1555
+host = ""
 
 secret_key = "lolkek123"
 pxolly_token = "84f..."

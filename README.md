@@ -1,7 +1,7 @@
 # pxollyrs
 Webhook for @pxolly on Rust
 
-### Найстрока 
+### Настройка 
 ```toml
 auto_connect = true 
 port = 1555

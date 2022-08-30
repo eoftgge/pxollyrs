@@ -98,7 +98,7 @@ impl PxollyHandler {
         };
 
         self.api_client
-            .api_request("messages.setRole", params)
+            .api_request("messages.setMemberRole", params)
             .await?;
         Ok(PxollyResponse::Success)
     }

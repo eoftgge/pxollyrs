@@ -51,7 +51,7 @@ pub struct PxollyEvent {
 }
 
 /// Responses:
-/// Text(String) -> return text (for example: API.messages.send({ ... });)
+/// Text(String) -> return text (for example: Text("API.messages.send({ ... });"))
 /// ConfirmationCode(String) -> return code for confirm
 /// ErrorCode(u8) -> return error code
 /// Success -> return 1

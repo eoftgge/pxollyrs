@@ -44,7 +44,8 @@ impl DatabaseJSON {
 
     async fn save(&self, chat_data: HashMap<String, u64>) -> PxollyResult<()> {
         let mut file = self.open().await?;
-        file.write_all(to_string_pretty(&chat_data)?.as_bytes()).await?;
+        file.write_all(to_string_pretty(&chat_data)?.as_bytes())
+            .await?;
 
         Ok(())
     }
@@ -57,14 +58,18 @@ impl DatabaseJSON {
         Ok(from_str(&*content).unwrap_or_default())
     }
 
-    pub async fn insert(&self, chat_id: String, chat_uid: u64) -> PxollyResult<()> {
+    pub async fn insert(&self, chat_id: &str, chat_uid: u64) -> PxollyResult<()> {
         let mut chat_data = self.chat_data().await?;
-        chat_data.insert(chat_id, chat_uid);
+        chat_data.insert(chat_id.into(), chat_uid);
 
         self.clear().await?;
         self.save(chat_data).await?;
 
         Ok(())
+    }
+
+    pub async fn contains(&self, chat_id: &str) -> bool {
+        self.get(chat_id).await.is_some()
     }
 
     pub async fn get(&self, chat_id: &str) -> Option<u64> {

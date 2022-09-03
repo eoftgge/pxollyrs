@@ -1,37 +1,38 @@
-use axum::{handler::post, AddExtensionLayer, Router};
+use axum::{extract::Extension, Router};
 use pxollyrs::api::client::APIClient;
-use pxollyrs::routers::handle;
-use pxollyrs::routers::handler::PxollyHandler;
-use pxollyrs::utils::{config::PxollyConfig, database::DatabaseJSON, PxollyTools};
+use pxollyrs::handlers::handle;
+use pxollyrs::utils::config::AppConfig;
+use pxollyrs::utils::database::DatabaseJSON;
+use pxollyrs::utils::{get_addr_and_url, get_confirmation_code, set_webhook};
+use pxollyrs::PxollyResult;
+use std::sync::Arc;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> PxollyResult<()> {
     simple_logger::init_with_level(log::Level::Info).unwrap();
 
-    let config = PxollyConfig::new()
-        .expect("An unknown error occurred while opening the file 'conf/config.toml'. Probably file doesn't exists.");
-    let api_client = APIClient::new(config.access_token.to_owned(), "5.131");
-    let database = DatabaseJSON::with("chats")
-        .await
-        .expect("An unknown error occurred while creating the database.");
-    let tools = PxollyTools::new(config)
-        .await
-        .expect("An unknown error occurred while getting the IP.");
-    let handler = PxollyHandler {
-        api_client,
-        database,
-        tools: tools.clone(),
-    };
+    let config = AppConfig::new()?;
+    let confirmation_code = get_confirmation_code(config.pxolly.token.clone()).await?;
+    let (addr, url) = get_addr_and_url(&config.server).await?;
+
+    let api_client = APIClient::new(&config.vk.token, &config.vk.version);
+    let database = DatabaseJSON::with("chats").await?;
+
     let router = Router::new()
-        .route("/", post(handle))
-        .layer(AddExtensionLayer::new(handler));
-    let addr = tools.get_addr();
+        .route("/", axum::routing::post(handle))
+        .layer(Extension(api_client.clone()))
+        .layer(Extension(confirmation_code.clone()))
+        .layer(Extension(config.pxolly.secret_key()))
+        .layer(Extension(Arc::new(database.clone())))
+        .layer(Extension(Arc::new(config.clone())));
 
     log::info!("Addr: {}", addr);
     log::info!("Server is starting...");
 
     let (_, _) = tokio::join! {
         axum::Server::bind(&addr).serve(router.into_make_service()),
-        tools.make_webhook()
+        set_webhook(config.server.is_bind, &config.pxolly, url)
     };
+
+    Ok(())
 }

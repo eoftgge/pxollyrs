@@ -1,25 +1,28 @@
+use crate::api::responses::APIResponseError;
 use crate::utils::models::PxollyResponse;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum PxollyError {
-    #[error("Error during read/write to file.")]
+    #[error("Error in config: {0}")]
+    Config(#[from] config::ConfigError),
+    #[error("Error in IO: {0}")]
     IO(#[from] std::io::Error),
-    #[error("Error during de/serialization.")]
+    #[error("Error in serde: {0}")]
     Serde(#[from] serde_json::Error),
-    #[error("Error http.")]
+    #[error("Error in reqwest: {0}")]
     HTTP(#[from] reqwest::Error),
-    #[error("Error during send request to API.")]
-    API(crate::api::response::APIError),
-    #[error("Response.")]
+    #[error("APIError({}) - {}", .0.error_code, .0.error_msg)]
+    API(APIResponseError),
+    #[error("Returning error code")]
     Response(PxollyResponse),
-    #[error("Other's error.")]
-    Other(String),
+    #[error("{0}")]
+    Message(String),
 }
 
 impl From<&str> for PxollyError {
     fn from(text: &str) -> Self {
-        Self::Other(text.into())
+        Self::Message(text.into())
     }
 }
 

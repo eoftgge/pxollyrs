@@ -1,7 +1,12 @@
-auto_connect = true
-port = 1555
+[server]
+is_bind = true
+port = 1488
 host = ""
 
-secret_key = "lolkek123"
-pxolly_token = "84f..."
-access_token = "4da..."
+[pxolly]
+secret_key = "set_key_here"
+token = "v8x.CymULq...."
+
+[vk]
+version = "5.131"
+token = "vk1.a.NJ52iO-4S..."

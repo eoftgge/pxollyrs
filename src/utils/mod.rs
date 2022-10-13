@@ -41,7 +41,7 @@ pub async fn set_webhook(is_bind: bool, config: &PxollyConfig, url: Url) -> Pxol
         .post("https://api.pxolly.ru/method/callback.editSettings")
         .form(&serde_json::json!({
             "url": url.to_string(),
-            "secret_key": config.secret_key,
+            "secret_key": config.secret_key().0,
             "access_token": config.token,
             "is_msgpack": 0,
         }));

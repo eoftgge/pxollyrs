@@ -1,5 +1,6 @@
 .idea
 target
-conf
+config/config.toml
+config/chats.json
 Dockerfile
 Cargo.lock

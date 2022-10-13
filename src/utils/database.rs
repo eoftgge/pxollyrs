@@ -12,7 +12,7 @@ pub struct DatabaseJSON {
 
 impl DatabaseJSON {
     pub async fn with(path: &str) -> PxollyResult<Self> {
-        let relative_path = PathBuf::from(format!("conf/{}.json", path));
+        let relative_path = PathBuf::from(format!("config/{}.json", path));
         let mut absolute_path = std::env::current_dir()?;
         absolute_path.push(relative_path);
 

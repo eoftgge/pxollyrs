@@ -1,4 +1,4 @@
-use config::{Config, ConfigError, File};
+use config::{builder::AsyncState, ConfigBuilder, ConfigError, File, FileFormat};
 use serde::Deserialize;
 use std::sync::Arc;
 
@@ -9,12 +9,12 @@ pub struct SecretKey(pub Arc<str>);
 pub struct ServerConfig {
     pub is_bind: bool,
     pub port: u16,
-    pub host: String,
+    pub(self) host: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct PxollyConfig {
-    pub secret_key: String,
+    pub(self) secret_key: String,
     pub token: String,
 }
 
@@ -47,10 +47,11 @@ impl PxollyConfig {
 }
 
 impl AppConfig {
-    pub fn new() -> Result<Self, ConfigError> {
-        let mut config = Config::default();
-
-        config.merge(File::with_name("conf/config.toml"))?;
-        config.try_into()
+    pub async fn new() -> Result<Self, ConfigError> {
+        ConfigBuilder::<AsyncState>::default()
+            .add_source(File::new("config/config.example.toml", FileFormat::Toml))
+            .build()
+            .await?
+            .try_deserialize()
     }
 }

@@ -11,7 +11,7 @@ use std::sync::Arc;
 async fn main() -> PxollyResult<()> {
     simple_logger::init_with_level(log::Level::Info).unwrap();
 
-    let config = AppConfig::new()?;
+    let config = AppConfig::new().await?;
     let confirmation_code = get_confirmation_code(config.pxolly.token.clone()).await?;
     let (addr, url) = get_addr_and_url(&config.server).await?;
 

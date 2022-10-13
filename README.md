@@ -1,4 +1,6 @@
 # pxollyrs
+> **NOTE**: The project will be rewritten in future
+
 Webhook for @pxolly on Rust <br> <br>
 ⚡ **BLAZING** FAST ⚡, 👀 **SIMPLE** 👀, 🚀 **MEMORY** SAFE 🚀 <br>
 😱 IT'S PROJECT HASN'T **UNSAFE** CODES 😱

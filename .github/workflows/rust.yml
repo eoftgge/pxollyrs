@@ -7,9 +7,7 @@ env:
 
 jobs:
   build:
-    runs-on: 
-      - ubuntu-20.04
-      - windows-latest
+    runs-on: ubuntu-latest
       
     steps:
     - uses: actions/checkout@v3

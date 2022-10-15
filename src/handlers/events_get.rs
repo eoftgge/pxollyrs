@@ -1,5 +1,5 @@
 use crate::handlers::HANDLERS;
-use crate::utils::models::PxollyResponse;
+use crate::pxolly::types::responses::PxollyResponse;
 use crate::PxollyResult;
 
 pub async fn execute() -> PxollyResult<PxollyResponse> {

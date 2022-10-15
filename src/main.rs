@@ -1,6 +1,7 @@
 use axum::{extract::Extension, Router};
 use pxollyrs::api::client::APIClient;
-use pxollyrs::handlers::handle;
+use pxollyrs::handlers::build_dispatcher;
+use pxollyrs::pxolly::execute::handle;
 use pxollyrs::utils::config::AppConfig;
 use pxollyrs::utils::database::DatabaseJSON;
 use pxollyrs::utils::{get_addr_and_url, get_confirmation_code, set_webhook};
@@ -9,7 +10,7 @@ use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> PxollyResult<()> {
-    simple_logger::init_with_level(log::Level::Info).unwrap();
+    simple_logger::init_with_level(log::Level::Debug).unwrap();
 
     let config = AppConfig::new().await?;
     let confirmation_code = get_confirmation_code(config.pxolly.token.clone()).await?;
@@ -24,7 +25,8 @@ async fn main() -> PxollyResult<()> {
         .layer(Extension(confirmation_code.clone()))
         .layer(Extension(config.pxolly.secret_key()))
         .layer(Extension(Arc::new(database.clone())))
-        .layer(Extension(Arc::new(config.clone())));
+        .layer(Extension(Arc::new(config.clone())))
+        .layer(Extension(Arc::new(build_dispatcher())));
 
     log::info!("Addr: {}", addr);
     log::info!("Server is starting...");

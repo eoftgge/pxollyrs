@@ -1,6 +1,6 @@
 use crate::errors::PxollyError;
 use crate::handlers::HandlerContext;
-use crate::utils::models::PxollyResponse;
+use crate::pxolly::types::responses::PxollyResponse;
 use crate::{par, PxollyResult};
 use serde_json::Value;
 
@@ -15,7 +15,7 @@ pub async fn execute(ctx: HandlerContext) -> PxollyResult<PxollyResponse> {
         .await
     {
         Ok(_) => PxollyResponse::Success,
-        Err(PxollyError::API(err)) => PxollyResponse::ErrorCode(0),
+        Err(PxollyError::API(_)) => PxollyResponse::ErrorCode(0),
         _ => PxollyResponse::ErrorCode(2),
     };
 

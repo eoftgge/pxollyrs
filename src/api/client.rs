@@ -17,7 +17,6 @@ impl APIClient {
     pub fn new(access_token: impl Into<String>, version: impl Into<String>) -> Self {
         Self {
             access_token: Arc::from(access_token.into()),
-
             version: Arc::from(version.into()),
             client: Arc::new(Client::new()),
         }
@@ -54,7 +53,7 @@ impl APIClient {
             .json::<APIResponse<T>>()
             .await?;
 
-        log::debug!("Sent the request to VKAPI, response: {:?}", response);
+        log::debug!("Sent the request to VK API, response: {:?}", response);
 
         match response {
             APIResponse::Response(response) => Ok(response),

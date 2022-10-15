@@ -1,5 +1,5 @@
 use crate::handlers::HandlerContext;
-use crate::utils::models::PxollyResponse;
+use crate::pxolly::types::responses::PxollyResponse;
 use crate::{par, PxollyResult};
 
 pub async fn execute(ctx: HandlerContext) -> PxollyResult<PxollyResponse> {

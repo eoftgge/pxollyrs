@@ -1,5 +1,5 @@
 use crate::api::responses::APIResponseError;
-use crate::utils::models::PxollyResponse;
+use crate::pxolly::types::responses::PxollyResponse;
 use thiserror::Error;
 
 #[derive(Debug, Error)]

@@ -49,7 +49,7 @@ impl PxollyConfig {
 impl AppConfig {
     pub async fn new() -> Result<Self, ConfigError> {
         ConfigBuilder::<AsyncState>::default()
-            .add_source(File::new("config/config.example.toml", FileFormat::Toml))
+            .add_source(File::new("config/config.toml", FileFormat::Toml))
             .build()
             .await?
             .try_deserialize()

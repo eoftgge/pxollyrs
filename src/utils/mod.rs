@@ -8,7 +8,6 @@ use std::sync::Arc;
 
 pub mod config;
 pub mod database;
-pub mod models;
 
 #[derive(Clone)]
 pub struct ConfirmationCode(pub Arc<str>);

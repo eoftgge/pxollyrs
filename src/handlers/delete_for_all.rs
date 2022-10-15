@@ -1,11 +1,14 @@
 use serde_json::{Map, Value};
 
+use crate::api::client::APIClient;
 use crate::pxolly::context::HandlerContext;
 use crate::pxolly::traits::TraitHandler;
 use crate::pxolly::types::responses::PxollyResponse;
 use crate::{par, PxollyResult};
 
-pub struct DeleteForAll;
+pub struct DeleteForAll {
+    pub(crate) client: APIClient,
+}
 
 #[async_trait::async_trait]
 impl TraitHandler for DeleteForAll {
@@ -24,7 +27,7 @@ impl TraitHandler for DeleteForAll {
                 .join(",")
         };
 
-        let response = ctx
+        let response = self
             .client
             .api_request::<Map<String, Value>>("messages.delete", params)
             .await?;

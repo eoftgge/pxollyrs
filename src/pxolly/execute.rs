@@ -2,14 +2,10 @@ use super::dispatcher::{Dispatcher, DispatcherBuilder};
 use super::traits::TraitHandler;
 use super::types::events::PxollyEvent;
 use super::types::responses::PxollyResponse;
-use crate::api::client::APIClient;
 use crate::errors::PxollyError;
 use crate::pxolly::context::HandlerContext;
-use crate::utils::config::SecretKey;
 use crate::utils::database::DatabaseJSON;
-use crate::utils::ConfirmationCode;
 use crate::PxollyResult;
-use axum::{Extension, Json};
 use std::sync::Arc;
 
 #[async_trait::async_trait]
@@ -38,7 +34,7 @@ where
     }
 }
 
-fn handle_error(err: PxollyError) -> PxollyResponse {
+fn handle_errors(err: PxollyError) -> PxollyResponse {
     match err {
         PxollyError::API(_) => PxollyResponse::ErrorCode(-4),
         PxollyError::Response(response) => response,
@@ -48,36 +44,32 @@ fn handle_error(err: PxollyError) -> PxollyResponse {
 }
 
 pub async fn handle(
-    Json(event): Json<PxollyEvent>,
-    Extension(dp): Extension<Arc<dyn Execute>>,
-    Extension(database): Extension<Arc<DatabaseJSON>>,
-    Extension(code): Extension<ConfirmationCode>,
-    Extension(client): Extension<APIClient>,
-    Extension(key): Extension<SecretKey>,
-) -> String {
-    log::debug!("Received the new event: {:?}", event);
+    event: PxollyEvent,
+    secret_key: &str,
+    database: &DatabaseJSON,
+    dispatcher: Arc<impl Execute>,
+) -> PxollyResponse {
+    log::debug!("received the new event: {:?}", event);
 
-    let peer_id = match event.object.chat_id.as_ref() {
-        None if event.secret_key != *code.0 => return "locked".into(),
-        None if event.event_type == "confirmation" => return "0".into(),
-        None => return "2".into(),
-        Some(_) if event.event_type == "sync" => None,
-        Some(chat_id) => database.get(chat_id).await,
-    };
-    let ctx = HandlerContext {
-        event,
-        database,
-        code,
-        key,
-        client,
-        peer_id,
-    };
-    let response = match dp.execute(ctx).await {
+    if event.secret_key != secret_key {
+        return PxollyResponse::Locked;
+    }
+
+    let response = match dispatcher
+        .execute(HandlerContext {
+            peer_id: match event.object.chat_id.as_ref() {
+                Some(chat_id) => database.get(chat_id).await,
+                _ => None,
+            },
+            event,
+        })
+        .await
+    {
         Ok(response) => response,
-        Err(err) => handle_error(err),
+        Err(err) => handle_errors(err),
     };
 
-    log::debug!("Response to the sender: {}", response.to_string());
+    log::debug!("response to the sender: {}", response.to_string());
 
-    response.to_string()
+    response
 }

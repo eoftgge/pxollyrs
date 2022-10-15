@@ -5,13 +5,13 @@ use std::path::PathBuf;
 use tokio::fs::{File, OpenOptions};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug)] // clone pathbuf
 pub struct DatabaseJSON {
     path: PathBuf,
 }
 
 impl DatabaseJSON {
-    pub async fn with(path: &str) -> PxollyResult<Self> {
+    pub async fn new(path: &str) -> PxollyResult<Self> {
         let relative_path = PathBuf::from(format!("config/{}.json", path));
         let mut absolute_path = std::env::current_dir()?;
         absolute_path.push(relative_path);

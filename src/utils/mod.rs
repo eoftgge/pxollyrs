@@ -9,15 +9,15 @@ use std::sync::Arc;
 pub mod config;
 pub mod database;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ConfirmationCode(pub Arc<str>);
 
-pub async fn get_confirmation_code(pxolly_token: String) -> PxollyResult<ConfirmationCode> {
+pub async fn get_confirmation_code(pxolly_token: String) -> PxollyResult<String> {
     let request_builder = Client::new()
         .post("https://api.pxolly.ru/method/callback.getSettings")
         .form(&serde_json::json!({ "access_token": pxolly_token }));
     let response = request_builder.send().await?.json::<Value>().await?;
-    let code = response
+    let confirmation_code = response
         .get("response")
         .expect("Expect field: response")
         .get("confirmation_code")
@@ -26,7 +26,7 @@ pub async fn get_confirmation_code(pxolly_token: String) -> PxollyResult<Confirm
         .map(|x| x.to_string())
         .unwrap(); // check upstairs
 
-    Ok(ConfirmationCode(Arc::from(code)))
+    Ok(confirmation_code)
 }
 
 pub async fn set_webhook(is_bind: bool, config: &PxollyConfig, url: Url) -> PxollyResult<()> {
@@ -40,7 +40,7 @@ pub async fn set_webhook(is_bind: bool, config: &PxollyConfig, url: Url) -> Pxol
         .post("https://api.pxolly.ru/method/callback.editSettings")
         .form(&serde_json::json!({
             "url": url.to_string(),
-            "secret_key": config.secret_key().0,
+            "secret_key": config.secret_key(),
             "access_token": config.token,
             "is_msgpack": 0,
         }));

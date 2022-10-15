@@ -1,10 +1,16 @@
+use crate::api::client::APIClient;
 use crate::errors::PxollyError;
 use crate::pxolly::context::HandlerContext;
 use crate::pxolly::traits::TraitHandler;
 use crate::pxolly::types::responses::PxollyResponse;
+use crate::utils::database::DatabaseJSON;
 use crate::{par, PxollyResult};
+use std::sync::Arc;
 
-pub struct Sync;
+pub struct Sync {
+    pub(crate) client: APIClient,
+    pub(crate) database: Arc<DatabaseJSON>,
+}
 
 #[async_trait::async_trait]
 impl TraitHandler for Sync {
@@ -21,13 +27,13 @@ impl TraitHandler for Sync {
         };
         let chat_id = ctx.object.chat_id.as_ref().expect("Expect field: chat_id");
 
-        if ctx.database.contains(chat_id).await {
+        if self.database.contains(chat_id).await {
             return Ok(PxollyResponse::ErrorCode(5));
         }
 
-        let peer_id = ctx.client.api_request::<i64>("execute", params).await?;
+        let peer_id = self.client.api_request::<i64>("execute", params).await?;
 
-        ctx.database
+        self.database
             .insert(chat_id.as_str(), peer_id as u64)
             .await
             .map_err(|_| PxollyError::Response(PxollyResponse::ErrorCode(3)))?;

@@ -1,3 +1,5 @@
+use axum::response::{IntoResponse, Response};
+
 /// Responses:
 /// Text(String) -> return text (for example: Text("API.messages.send({ ... });"))
 /// ConfirmationCode(String) -> return code for confirm
@@ -22,5 +24,11 @@ impl ToString for PxollyResponse {
             Self::Success => "1".into(),
             Self::Locked => "locked".into(),
         }
+    }
+}
+
+impl IntoResponse for PxollyResponse {
+    fn into_response(self) -> Response {
+        self.to_string().into_response()
     }
 }

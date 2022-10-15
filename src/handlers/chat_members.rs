@@ -1,9 +1,12 @@
+use crate::api::client::APIClient;
 use crate::pxolly::context::HandlerContext;
 use crate::pxolly::traits::TraitHandler;
 use crate::pxolly::types::responses::PxollyResponse;
 use crate::{par, PxollyResult};
 
-pub struct ChatMembers;
+pub struct ChatMembers {
+    pub(crate) client: APIClient,
+}
 
 #[async_trait::async_trait]
 impl TraitHandler for ChatMembers {
@@ -13,7 +16,7 @@ impl TraitHandler for ChatMembers {
         let params = par! {
             "chat_id": ctx.peer_id() - 2_000_000_000,
         };
-        let response = ctx
+        let response = self
             .client
             .api_request::<serde_json::Value>("messages.getChat", params)
             .await?;

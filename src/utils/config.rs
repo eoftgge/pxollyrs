@@ -1,9 +1,5 @@
 use config::{builder::AsyncState, ConfigBuilder, ConfigError, File, FileFormat};
 use serde::Deserialize;
-use std::sync::Arc;
-
-#[derive(Clone)]
-pub struct SecretKey(pub Arc<str>);
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct ServerConfig {
@@ -41,8 +37,8 @@ impl ServerConfig {
 }
 
 impl PxollyConfig {
-    pub fn secret_key(&self) -> SecretKey {
-        SecretKey(Arc::from(&*self.secret_key))
+    pub fn secret_key(&self) -> String {
+        self.secret_key.clone()
     }
 }
 

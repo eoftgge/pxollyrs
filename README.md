@@ -1,5 +1,5 @@
 # pxollyrs
-> **NOTE**: The project will be rewritten in future
+> **NOTE**: The project will be rewritten in future. [click to the branch v2.0](https://github.com/eoftgge/pxollyrs/tree/v2.0)
 
 Webhook for @pxolly on Rust <br> <br>
 ⚡ **BLAZING** FAST ⚡, 👀 **SIMPLE** 👀, 🚀 **MEMORY** SAFE 🚀 <br>

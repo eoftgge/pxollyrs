@@ -1,7 +1,4 @@
-use crate::pxolly::context::HandlerContext;
-use crate::pxolly::traits::TraitHandler;
-use crate::pxolly::types::responses::PxollyResponse;
-use crate::PxollyResult;
+use super::prelude::*;
 
 pub struct Confirmation {
     pub(crate) confirmation_code: String,
@@ -11,7 +8,7 @@ pub struct Confirmation {
 impl TraitHandler for Confirmation {
     const EVENT_TYPE: &'static str = "confirmation";
 
-    async fn execute(&self, _: HandlerContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, _: PxollyContext) -> PxollyResult<PxollyResponse> {
         Ok(PxollyResponse::ConfirmationCode(
             self.confirmation_code.clone(),
         ))

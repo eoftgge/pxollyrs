@@ -1,7 +1,14 @@
-use crate::handlers::HANDLERS;
-use crate::pxolly::types::responses::PxollyResponse;
-use crate::PxollyResult;
+use super::prelude::*;
 
-pub async fn execute() -> PxollyResult<PxollyResponse> {
-    Ok(PxollyResponse::Text(HANDLERS.join(",")))
+pub struct EventsGet {
+    pub(crate) handlers: Vec<&'static str>,
+}
+
+#[async_trait::async_trait]
+impl TraitHandler for EventsGet {
+    const EVENT_TYPE: &'static str = "events_get";
+
+    async fn execute(&self, _: PxollyContext) -> PxollyResult<PxollyResponse> {
+        Ok(PxollyResponse::Text(self.handlers.join(",")))
+    }
 }

@@ -1,10 +1,5 @@
+use super::prelude::*;
 use serde_json::{Map, Value};
-
-use crate::api::client::APIClient;
-use crate::pxolly::context::HandlerContext;
-use crate::pxolly::traits::TraitHandler;
-use crate::pxolly::types::responses::PxollyResponse;
-use crate::{par, PxollyResult};
 
 pub struct DeleteForAll {
     pub(crate) client: APIClient,
@@ -14,9 +9,9 @@ pub struct DeleteForAll {
 impl TraitHandler for DeleteForAll {
     const EVENT_TYPE: &'static str = "delete_for_all";
 
-    async fn execute(&self, ctx: HandlerContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, ctx: PxollyContext) -> PxollyResult<PxollyResponse> {
         let params = par! {
-            "peer_id": ctx.peer_id(),
+            "peer_id": ctx.peer_id()?,
             "delete_for_all": 1,
             "cmids": ctx.object.conversation_message_ids
                 .as_ref()

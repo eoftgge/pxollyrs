@@ -1,8 +1,4 @@
-use crate::api::client::APIClient;
-use crate::pxolly::context::HandlerContext;
-use crate::pxolly::traits::TraitHandler;
-use crate::pxolly::types::responses::PxollyResponse;
-use crate::{par, PxollyResult};
+use super::prelude::*;
 
 pub struct ChatMembers {
     pub(crate) client: APIClient,
@@ -12,9 +8,9 @@ pub struct ChatMembers {
 impl TraitHandler for ChatMembers {
     const EVENT_TYPE: &'static str = "chat_members";
 
-    async fn execute(&self, ctx: HandlerContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, ctx: PxollyContext) -> PxollyResult<PxollyResponse> {
         let params = par! {
-            "chat_id": ctx.peer_id() - 2_000_000_000,
+            "chat_id": ctx.peer_id()? - 2_000_000_000,
         };
         let response = self
             .client

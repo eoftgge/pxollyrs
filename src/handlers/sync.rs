@@ -1,22 +1,21 @@
 use crate::api::client::APIClient;
 use crate::errors::PxollyError;
-use crate::pxolly::context::HandlerContext;
+use crate::pxolly::context::PxollyContext;
 use crate::pxolly::traits::TraitHandler;
 use crate::pxolly::types::responses::PxollyResponse;
 use crate::utils::database::DatabaseJSON;
 use crate::{par, PxollyResult};
-use std::sync::Arc;
 
 pub struct Sync {
     pub(crate) client: APIClient,
-    pub(crate) database: Arc<DatabaseJSON>,
+    pub(crate) database: DatabaseJSON,
 }
 
 #[async_trait::async_trait]
 impl TraitHandler for Sync {
     const EVENT_TYPE: &'static str = "sync";
 
-    async fn execute(&self, ctx: HandlerContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, ctx: PxollyContext) -> PxollyResult<PxollyResponse> {
         let message = ctx.object.message.as_ref().expect("Expect field: message");
         let params = par! {
             "code": EXECUTE_SYNC_CODE,

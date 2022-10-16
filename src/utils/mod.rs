@@ -12,7 +12,7 @@ pub mod database;
 #[derive(Clone, Debug)]
 pub struct ConfirmationCode(pub Arc<str>);
 
-pub async fn get_confirmation_code(pxolly_token: String) -> PxollyResult<String> {
+pub async fn get_confirmation_code(pxolly_token: &str) -> PxollyResult<String> {
     let request_builder = Client::new()
         .post("https://api.pxolly.ru/method/callback.getSettings")
         .form(&serde_json::json!({ "access_token": pxolly_token }));

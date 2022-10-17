@@ -3,6 +3,7 @@ use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
 use crate::PxollyResult;
 
+#[derive(Debug)]
 pub struct PxollyContext {
     event: PxollyEvent,
     peer_id: Option<u64>,
@@ -15,7 +16,7 @@ impl PxollyContext {
 
     pub fn peer_id(&self) -> PxollyResult<u64> {
         self.peer_id
-            .ok_or(PxollyError::Response(PxollyResponse::ErrorCode(3)))
+            .ok_or(PxollyError::Response(PxollyResponse::ErrorCode(-2)))
     }
 }
 

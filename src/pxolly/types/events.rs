@@ -34,6 +34,8 @@ pub struct PxollyData {
     pub can_text: Option<u8>,
     pub admin: Option<u8>,
     pub code: Option<String>,
+    pub is_remove: Option<u8>,
+    pub photo_url: Option<String>,
 
     #[serde(rename = "v")]
     pub version: Option<u8>,

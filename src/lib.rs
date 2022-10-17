@@ -1,5 +1,3 @@
-extern crate core;
-
 pub use crate::errors::PxollyResult;
 
 pub mod api;

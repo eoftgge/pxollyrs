@@ -53,7 +53,7 @@ impl APIClient {
             .json::<APIResponse<T>>()
             .await?;
 
-        log::debug!("Sent the request to VK API, response: {:?}", response);
+        log::debug!("sent the request to VK API, response: {:?}", response);
 
         match response {
             APIResponse::Response(response) => Ok(response),

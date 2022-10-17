@@ -71,12 +71,12 @@ impl<E: Execute> Executor<E> {
         let ctx = PxollyContext::new(event, peer_id);
         let response = match self.executor.execute(ctx).await {
             Ok(response) => response,
-            Err(PxollyError::API(_)) => PxollyResponse::ErrorCode(-4),
+            Err(PxollyError::API(_)) => PxollyResponse::ErrorCode(-1),
             Err(PxollyError::Response(response)) => response,
             Err(PxollyError::IO(_)) => PxollyResponse::ErrorCode(3),
             Err(err) => {
                 log::error!("in the dispatcher occurred unknown error: {:?}", err);
-                PxollyResponse::ErrorCode(0)
+                PxollyResponse::ErrorCode(2)
             }
         };
 
@@ -89,9 +89,9 @@ impl<E: Execute + 'static> Handler<()> for Executor<E> {
     type Future = Pin<Box<dyn Future<Output = Response> + Send>>;
 
     fn call(self, req: Request<Body>) -> Self::Future {
-        let mut req = RequestParts::new(req);
+        let mut parts = RequestParts::new(req);
         Box::pin(async move {
-            self.execute(match Json::<PxollyEvent>::from_request(&mut req).await {
+            self.execute(match Json::<PxollyEvent>::from_request(&mut parts).await {
                 Ok(event) => event,
                 Err(err) => return err.into_response(),
             })

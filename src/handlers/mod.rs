@@ -1,4 +1,5 @@
 mod chat_members;
+mod chat_photo_update;
 mod confirmation;
 mod delete_for_all;
 mod events_get;
@@ -25,7 +26,7 @@ use crate::pxolly::dispatcher::{DispatcherBuilder, PushHandler, EVENT_TYPES_HAND
 use crate::pxolly::execute::Execute;
 use crate::utils::database::DatabaseJSON;
 
-pub fn build_dispatcher<'a>(
+pub fn build_dispatcher(
     confirmation_code: String,
     client: APIClient,
     database: &DatabaseJSON,
@@ -34,6 +35,7 @@ pub fn build_dispatcher<'a>(
         .push_handler(chat_members::ChatMembers {
             client: client.clone(),
         })
+        .push_handler(chat_photo_update::ChatPhotoUpdate::new(client.clone()))
         .push_handler(delete_for_all::DeleteForAll {
             client: client.clone(),
         })
@@ -59,11 +61,11 @@ pub fn build_dispatcher<'a>(
             client: client.clone(),
         })
         .push_handler(sync::Sync {
-            client: client,
+            client,
             database: database.clone(),
         })
         .push_handler(confirmation::Confirmation { confirmation_code }) // WARNING: IT'S ALWAYS PENULTIMATE
         .push_handler(events_get::EventsGet {
-            handlers: unsafe { EVENT_TYPES_HANDLERS.clone() },
+            handlers: unsafe { EVENT_TYPES_HANDLERS.clone() }, // IT SAFE CODE!!!! I SWEAR BY MY MOM!!!!
         }) // WARNING: IT'S ALWAYS LAST!!!
 }

@@ -71,9 +71,15 @@ impl<E: Execute> Executor<E> {
         let ctx = PxollyContext::new(event, peer_id);
         let response = match self.executor.execute(ctx).await {
             Ok(response) => response,
-            Err(PxollyError::API(_)) => PxollyResponse::ErrorCode(-1),
+            Err(PxollyError::API(err)) => {
+                log::error!("in the dispatcher occurred api error: {:?}", err);
+                PxollyResponse::ErrorCode(-1)
+            }
             Err(PxollyError::Response(response)) => response,
-            Err(PxollyError::IO(_)) => PxollyResponse::ErrorCode(3),
+            Err(PxollyError::IO(err)) => {
+                log::error!("in the dispatcher occurred io error: {:?}", err);
+                PxollyResponse::ErrorCode(3)
+            }
             Err(err) => {
                 log::error!("in the dispatcher occurred unknown error: {:?}", err);
                 PxollyResponse::ErrorCode(2)

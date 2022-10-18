@@ -1,9 +1,9 @@
 use crate::api::client::APIClient;
+use crate::database::DatabaseJSON;
 use crate::errors::PxollyError;
 use crate::pxolly::context::PxollyContext;
 use crate::pxolly::traits::TraitHandler;
 use crate::pxolly::types::responses::PxollyResponse;
-use crate::utils::database::DatabaseJSON;
 use crate::{par, PxollyResult};
 
 pub struct Sync {

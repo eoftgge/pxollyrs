@@ -1,13 +1,11 @@
+use crate::config::application::ServerConfig;
+use crate::config::pxolly::PxollyConfig;
 use crate::errors::PxollyResult;
-use crate::utils::config::{PxollyConfig, ServerConfig};
 use reqwest::{Client, Url};
 use serde_json::Value;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::str::FromStr;
 use std::sync::Arc;
-
-pub mod config;
-pub mod database;
 
 #[derive(Clone, Debug)]
 pub struct ConfirmationCode(pub Arc<str>);
@@ -29,7 +27,7 @@ pub async fn get_confirmation_code(pxolly_token: &str) -> PxollyResult<String> {
     Ok(confirmation_code)
 }
 
-pub async fn set_webhook(is_bind: bool, config: &PxollyConfig, url: Url) -> PxollyResult<()> {
+pub async fn bind_webhook(is_bind: bool, config: &PxollyConfig, url: Url) -> PxollyResult<()> {
     if !is_bind {
         return Ok(());
     }
@@ -40,7 +38,7 @@ pub async fn set_webhook(is_bind: bool, config: &PxollyConfig, url: Url) -> Pxol
         .post("https://api.pxolly.ru/method/callback.editSettings")
         .form(&serde_json::json!({
             "url": url.to_string(),
-            "secret_key": config.secret_key(),
+            "secret_key": config.secret_key,
             "access_token": config.token,
             "is_msgpack": 0,
         }));
@@ -55,7 +53,7 @@ pub async fn get_addr_and_url(config: &ServerConfig) -> PxollyResult<(SocketAddr
     let addr: SocketAddr;
     let port = config.port;
 
-    if let Some(host) = config.host() {
+    if let Some(host) = config.host.as_ref() {
         addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), port);
         url = Url::from_str(&*host).expect("`config.host` is invalid");
     } else if let Some(ip_addr) = public_ip::addr().await {

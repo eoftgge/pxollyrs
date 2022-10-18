@@ -3,8 +3,8 @@ use super::dispatcher::{Dispatcher, DispatcherBuilder};
 use super::traits::TraitHandler;
 use super::types::events::PxollyEvent;
 use super::types::responses::PxollyResponse;
+use crate::database::DatabaseJSON;
 use crate::errors::{PxollyError, PxollyResult};
-use crate::utils::database::DatabaseJSON;
 use axum::body::Body;
 use axum::extract::{FromRequest, RequestParts};
 use axum::handler::Handler;
@@ -49,10 +49,10 @@ pub struct Executor<E: Execute> {
 }
 
 impl<E: Execute> Executor<E> {
-    pub fn new(executor: E, secret_key: String, database: DatabaseJSON) -> Self {
+    pub fn new(executor: E, secret_key: impl Into<String>, database: DatabaseJSON) -> Self {
         Self {
             executor: Arc::new(executor),
-            secret_key,
+            secret_key: secret_key.into(),
             database,
         }
     }

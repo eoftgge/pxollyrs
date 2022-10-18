@@ -22,9 +22,9 @@ pub mod prelude {
 }
 
 use crate::api::client::APIClient;
+use crate::database::DatabaseJSON;
 use crate::pxolly::dispatcher::{DispatcherBuilder, PushHandler, EVENT_TYPES_HANDLERS};
 use crate::pxolly::execute::Execute;
-use crate::utils::database::DatabaseJSON;
 
 pub fn build_dispatcher(
     confirmation_code: String,

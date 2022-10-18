@@ -1,12 +1,13 @@
-[server]
-is_bind = true
-port = 1488
-host = ""
-
 [pxolly]
-secret_key = "set_key_here"
+secret_key = "secret_key"
 token = "v8x.CymULq...."
 
 [vk]
 version = "5.131"
 token = "vk1.a.NJ52iO-4S..."
+
+[application]
+is_bind = true
+server = { ip = "localhost", port = 1488, host = "https://myhost.com" }
+database = { path = "config/chat.json" }
+logger = { level = "info" }

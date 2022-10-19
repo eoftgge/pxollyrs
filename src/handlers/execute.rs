@@ -2,7 +2,7 @@ use super::prelude::*;
 use serde_json::{to_string, Value};
 
 pub struct Execute {
-    pub(crate) client: APIClient,
+    pub(crate) client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -18,7 +18,7 @@ impl TraitHandler for Execute {
 
         let response = match self.client.api_request::<Value>("execute", params).await {
             Ok(response) => PxollyResponse::Text(to_string(&response)?),
-            Err(PxollyError::API(err)) => PxollyResponse::Text(to_string(&err)?),
+            Err(WebhookError::API(err)) => PxollyResponse::Text(to_string(&err)?),
             _ => PxollyResponse::ErrorCode(1),
         };
 

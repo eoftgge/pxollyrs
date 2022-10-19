@@ -1,4 +1,4 @@
-use crate::errors::PxollyError;
+use crate::errors::WebhookError;
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
 use crate::PxollyResult;
@@ -16,7 +16,7 @@ impl PxollyContext {
 
     pub fn peer_id(&self) -> PxollyResult<u64> {
         self.peer_id
-            .ok_or(PxollyError::Response(PxollyResponse::ErrorCode(-2)))
+            .ok_or(WebhookError::Response(PxollyResponse::ErrorCode(-2)))
     }
 }
 

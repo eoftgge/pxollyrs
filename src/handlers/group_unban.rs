@@ -2,7 +2,7 @@ use super::prelude::*;
 use serde_json::Value;
 
 pub struct GroupUnban {
-    pub(crate) client: APIClient,
+    pub(crate) client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -20,7 +20,7 @@ impl TraitHandler for GroupUnban {
             .await
         {
             Ok(_) => PxollyResponse::Success,
-            Err(PxollyError::API(err)) => match err.error_code {
+            Err(WebhookError::API(err)) => match err.error_code {
                 15 => PxollyResponse::ErrorCode(0),
                 _ => PxollyResponse::ErrorCode(2),
             },

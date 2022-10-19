@@ -13,22 +13,22 @@ mod set_theme;
 mod sync;
 
 pub mod prelude {
-    pub use crate::api::client::APIClient;
-    pub use crate::errors::{PxollyError, PxollyResult};
+    pub use crate::errors::{PxollyResult, WebhookError};
     pub use crate::par;
     pub use crate::pxolly::context::PxollyContext;
     pub use crate::pxolly::traits::TraitHandler;
     pub use crate::pxolly::types::responses::PxollyResponse;
+    pub use crate::vk::api::VKAPI;
 }
 
-use crate::api::client::APIClient;
 use crate::database::DatabaseJSON;
 use crate::pxolly::dispatcher::{DispatcherBuilder, PushHandler, EVENT_TYPES_HANDLERS};
 use crate::pxolly::execute::Execute;
+use crate::vk::api::VKAPI;
 
 pub fn build_dispatcher(
     confirmation_code: String,
-    client: APIClient,
+    client: VKAPI,
     database: &DatabaseJSON,
 ) -> impl Execute {
     DispatcherBuilder

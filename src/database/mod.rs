@@ -1,3 +1,7 @@
+pub mod models;
+mod query;
+pub mod session;
+
 use crate::errors::PxollyResult;
 use serde_json::{from_str, to_string_pretty};
 use std::collections::HashMap;
@@ -11,13 +15,9 @@ pub struct DatabaseJSON {
 }
 
 impl DatabaseJSON {
-    pub async fn new(path: &str) -> PxollyResult<Self> {
-        let relative_path = PathBuf::from(format!("config/{}.json", path));
-        let mut absolute_path = std::env::current_dir()?;
-        absolute_path.push(relative_path);
-
+    pub async fn new(path: impl AsRef<PathBuf>) -> PxollyResult<Self> {
         Ok(Self {
-            path: absolute_path,
+            path: path.as_ref().to_owned(),
         })
     }
 

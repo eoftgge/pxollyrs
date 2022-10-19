@@ -1,7 +1,7 @@
 use super::prelude::*;
 
 pub struct InviteUser {
-    pub(crate) client: APIClient,
+    pub(crate) client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -20,7 +20,7 @@ impl TraitHandler for InviteUser {
                 -100 => PxollyResponse::ErrorCode(-1),
                 _ => PxollyResponse::Success,
             },
-            Err(PxollyError::API(_)) => PxollyResponse::ErrorCode(0),
+            Err(WebhookError::API(_)) => PxollyResponse::ErrorCode(0),
             _ => PxollyResponse::Text("internal".into()),
         };
 

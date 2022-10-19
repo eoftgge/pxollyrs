@@ -2,7 +2,7 @@ use super::prelude::*;
 use serde_json::Value;
 
 pub struct SetTheme {
-    pub(crate) client: APIClient,
+    pub(crate) client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -20,7 +20,7 @@ impl TraitHandler for SetTheme {
             .await
         {
             Ok(_) => PxollyResponse::Success,
-            Err(PxollyError::API(_)) => PxollyResponse::ErrorCode(0),
+            Err(WebhookError::API(_)) => PxollyResponse::ErrorCode(0),
             _ => PxollyResponse::ErrorCode(2),
         };
 

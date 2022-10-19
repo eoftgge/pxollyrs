@@ -2,7 +2,7 @@ use super::prelude::*;
 use serde_json::{Map, Value};
 
 pub struct DeleteForAll {
-    pub(crate) client: APIClient,
+    pub(crate) client: VKAPI,
 }
 
 #[async_trait::async_trait]

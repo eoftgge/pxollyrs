@@ -1,7 +1,7 @@
 use super::prelude::*;
 
 pub struct SetAdmin {
-    pub(crate) client: APIClient,
+    pub(crate) client: VKAPI,
 }
 
 #[async_trait::async_trait]

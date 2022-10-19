@@ -1,10 +1,10 @@
 use axum::{routing::post, Router};
-use pxollyrs::api::client::APIClient;
 use pxollyrs::config::WebhookConfig;
 use pxollyrs::database::DatabaseJSON;
 use pxollyrs::handlers::build_dispatcher;
 use pxollyrs::pxolly::execute::Executor;
 use pxollyrs::utils::{bind_webhook, get_addr_and_url, get_confirmation_code};
+use pxollyrs::vk::api::VKAPI;
 use pxollyrs::PxollyResult;
 
 #[tokio::main]
@@ -17,7 +17,7 @@ async fn main() -> PxollyResult<()> {
     let (addr, url) = get_addr_and_url(config.application().server()).await?;
 
     // applications
-    let client = APIClient::new(config.vk().token(), config.vk().version());
+    let client = VKAPI::new(config.vk().token(), config.vk().version());
     let database = DatabaseJSON::new("chats").await?;
     let dispatcher = build_dispatcher(confirmation_code, client, &database);
     let executor = Executor::new(dispatcher, config.pxolly().secret_key(), database);

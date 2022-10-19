@@ -5,12 +5,12 @@ use serde_json::Value;
 use crate::handlers::prelude::*;
 
 pub struct ChatPhotoUpdate {
-    api_client: APIClient,
+    api_client: VKAPI,
     http_client: Client,
 }
 
 impl ChatPhotoUpdate {
-    pub fn new(api_client: APIClient) -> Self {
+    pub fn new(api_client: VKAPI) -> Self {
         Self {
             api_client,
             http_client: Client::new(),
@@ -54,7 +54,8 @@ impl TraitHandler for ChatPhotoUpdate {
             .await?;
         let body = response["response"]
             .as_str()
-            .ok_or_else(|| PxollyError::from("response isn't str...."))? as &str;
+            .ok_or_else(|| WebhookError::from("response isn't str...."))?
+            as &str;
         let _ = self
             .api_client
             .api_request::<Value>(

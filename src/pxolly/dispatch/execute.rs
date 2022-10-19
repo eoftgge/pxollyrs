@@ -4,7 +4,7 @@ use super::traits::TraitHandler;
 use super::types::events::PxollyEvent;
 use super::types::responses::PxollyResponse;
 use crate::database::DatabaseJSON;
-use crate::errors::{PxollyError, PxollyResult};
+use crate::errors::{PxollyResult, WebhookError};
 use axum::body::Body;
 use axum::extract::{FromRequest, RequestParts};
 use axum::handler::Handler;
@@ -71,12 +71,12 @@ impl<E: Execute> Executor<E> {
         let ctx = PxollyContext::new(event, peer_id);
         let response = match self.executor.execute(ctx).await {
             Ok(response) => response,
-            Err(PxollyError::API(err)) => {
+            Err(WebhookError::API(err)) => {
                 log::error!("in the dispatcher occurred api error: {:?}", err);
                 PxollyResponse::ErrorCode(-1)
             }
-            Err(PxollyError::Response(response)) => response,
-            Err(PxollyError::IO(err)) => {
+            Err(WebhookError::Response(response)) => response,
+            Err(WebhookError::IO(err)) => {
                 log::error!("in the dispatcher occurred io error: {:?}", err);
                 PxollyResponse::ErrorCode(3)
             }

@@ -1,6 +1,6 @@
 pub use crate::errors::PxollyResult;
 
-pub mod api;
+pub mod vk;
 pub mod config;
 pub mod database;
 pub mod errors;

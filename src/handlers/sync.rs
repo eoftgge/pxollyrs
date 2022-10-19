@@ -1,13 +1,13 @@
-use crate::api::client::APIClient;
 use crate::database::DatabaseJSON;
-use crate::errors::PxollyError;
+use crate::errors::WebhookError;
 use crate::pxolly::context::PxollyContext;
 use crate::pxolly::traits::TraitHandler;
 use crate::pxolly::types::responses::PxollyResponse;
+use crate::vk::api::VKAPI;
 use crate::{par, PxollyResult};
 
 pub struct Sync {
-    pub(crate) client: APIClient,
+    pub(crate) client: VKAPI,
     pub(crate) database: DatabaseJSON,
 }
 
@@ -35,7 +35,7 @@ impl TraitHandler for Sync {
         self.database
             .insert(chat_id.as_str(), peer_id as u64)
             .await
-            .map_err(|_| PxollyError::Response(PxollyResponse::ErrorCode(3)))?;
+            .map_err(|_| WebhookError::Response(PxollyResponse::ErrorCode(3)))?;
 
         Ok(PxollyResponse::ConfirmationCode(
             ctx.object

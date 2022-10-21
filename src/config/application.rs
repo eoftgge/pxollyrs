@@ -6,11 +6,13 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct ApplicationConfig {
     pub is_bind: bool,
     server: ServerConfig,
+    #[serde(default)]
     logger: LoggerConfig,
+    #[serde(default)]
     database: DatabaseConfig,
 }
 
@@ -28,7 +30,7 @@ impl ApplicationConfig {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct ServerConfig {
     pub port: u16,
     pub ip: Option<IpAddr>,
@@ -58,7 +60,7 @@ impl ServerConfig {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct LoggerConfig {
     pub level: Option<String>,
 }
@@ -76,7 +78,7 @@ impl LoggerConfig {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct DatabaseConfig {
     path: Option<PathBuf>,
 }

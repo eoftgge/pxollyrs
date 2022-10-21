@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct PxollyConfig {
     pub(crate) token: String,
 }

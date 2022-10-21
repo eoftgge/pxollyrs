@@ -8,7 +8,7 @@ use crate::config::vk::VKConfig;
 use config::{builder::AsyncState, ConfigBuilder, ConfigError, File, FileFormat};
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct WebhookConfig {
     application: ApplicationConfig,
     vk: VKConfig,

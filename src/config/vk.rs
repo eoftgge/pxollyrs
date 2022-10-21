@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct VKConfig {
     pub(crate) token: String,
     pub(crate) version: String,

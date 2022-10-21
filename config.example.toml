@@ -1,13 +1,12 @@
 [pxolly]
-secret_key = "secret_key"
-token = "v8x.CymULq...."
+token = "v8x.Cym..."
 
 [vk]
 version = "5.131"
-token = "vk1.a.NJ52iO-4S..."
+token = "vk1.a.DU..."
 
 [application]
-is_bind = true
-server = { ip = "localhost", port = 1488, host = "https://myhost.com" }
-database = { path = "config/chat.json" }
-logger = { level = "info" }
+is_bind = false
+server = { port = 1488, host = " https://34a2-94-245-163-148.jp.ngrok.io" }
+database = { path = "chat.json" }
+logger = { level = "info" } 

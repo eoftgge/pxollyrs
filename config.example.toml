@@ -1,12 +1,24 @@
 [pxolly]
+# str: - токен от @pxolly
 token = "v8x.Cym..."
 
 [vk]
+# strdecimal: - версия API, крайне не рекомендуется менять версию
 version = "5.131"
+# str: - токен от Вконтакте
 token = "vk1.a.DU..."
 
 [application]
+# bool: - автопривязка сервера к @pxolly 
 is_bind = false
-server = { port = 1488, host = " https://34a2-94-245-163-148.jp.ngrok.io" }
+# map(str, union(str, int))
+# port(int16): порт сервера (обязательный)
+# ip(ipvaddr): IP сервера (опциональный, default = 127.0.0.1)
+# host(str): хост сервера (опциональный, e.g https://ngrok.http)
+server = { port = 1488 }
+# map(str, str)
+# path(str): - путь к базе данных (опциональный, default = chat.json)
 database = { path = "chat.json" }
+# map(str, str)
+# level(str): - уровень лога (опциональный, default = info)
 logger = { level = "info" } 

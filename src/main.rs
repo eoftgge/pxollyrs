@@ -1,37 +1,57 @@
-use axum::{extract::Extension, Router};
-use pxollyrs::api::client::APIClient;
-use pxollyrs::handlers::handle;
-use pxollyrs::utils::config::AppConfig;
-use pxollyrs::utils::database::DatabaseJSON;
-use pxollyrs::utils::{get_addr_and_url, get_confirmation_code, set_webhook};
-use pxollyrs::PxollyResult;
+use axum::{routing::post, Router};
+use pxollyrs::config::WebhookConfig;
+use pxollyrs::database::conn::DatabaseConn;
+use pxollyrs::handlers::build_dispatcher;
+use pxollyrs::pxolly::api::PxollyAPI;
+use pxollyrs::pxolly::dispatch::execute::Executor;
+use pxollyrs::pxolly::types::responses::get_settings::GetSettingsResponse;
+use pxollyrs::vk::api::VKAPI;
 use std::sync::Arc;
 
 #[tokio::main]
-async fn main() -> PxollyResult<()> {
-    simple_logger::init_with_level(log::Level::Info).unwrap();
+async fn main() -> pxollyrs::errors::WebhookResult<()> {
+    let config = WebhookConfig::new().await?;
+    config.application().logger().set_level();
 
-    let config = AppConfig::new().await?;
-    let confirmation_code = get_confirmation_code(config.pxolly.token.clone()).await?;
-    let (addr, url) = get_addr_and_url(&config.server).await?;
+    let (addr, host) = config.application().server().addr_and_host().await?;
+    let conn = DatabaseConn::new(config.application().database().path()).await?;
+    let http_client = Arc::new(reqwest::Client::new());
+    let pxolly_client = PxollyAPI::new(http_client.clone(), config.pxolly().token());
+    let vk_client = VKAPI::new(
+        http_client.clone(),
+        config.vk().token(),
+        config.vk().version(),
+    );
 
-    let api_client = APIClient::new(&config.vk.token, &config.vk.version);
-    let database = DatabaseJSON::with("chats").await?;
+    let GetSettingsResponse {
+        confirmation_code,
+        secret_key,
+        ..
+    } = pxolly_client.callback().get_settings().await?;
+    let dispatcher = build_dispatcher(vk_client, http_client, confirmation_code);
+    let executor = Executor::new(dispatcher, conn, &secret_key);
+    let router = Router::new().route("/", post(executor));
 
-    let router = Router::new()
-        .route("/", axum::routing::post(handle))
-        .layer(Extension(api_client.clone()))
-        .layer(Extension(confirmation_code.clone()))
-        .layer(Extension(config.pxolly.secret_key()))
-        .layer(Extension(Arc::new(database.clone())))
-        .layer(Extension(Arc::new(config.clone())));
-
-    log::info!("Addr: {}", addr);
-    log::info!("Server is starting...");
+    log::info!("Server is starting! (addr: {}; host: {})", addr, host);
 
     let (_, _) = tokio::join! {
         axum::Server::bind(&addr).serve(router.into_make_service()),
-        set_webhook(config.server.is_bind, &config.pxolly, url)
+        async move {
+            if !config.application().is_bind {
+                return;
+            }
+
+            match pxolly_client
+                .callback()
+                .edit_settings()
+                .url(host)
+                .secret_key(&secret_key)
+                .await
+            {
+                Ok(res) => log::info!("Bind webhook is successfully: {:?}", res),
+                Err(err) => log::error!("Bind webhook is failed: {:?}", err),
+            }
+        }
     };
 
     Ok(())

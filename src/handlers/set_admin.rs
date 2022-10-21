@@ -1,15 +1,23 @@
-use crate::handlers::HandlerContext;
-use crate::utils::models::PxollyResponse;
-use crate::{par, PxollyResult};
+use super::prelude::*;
 
-pub async fn execute(ctx: HandlerContext) -> PxollyResult<PxollyResponse> {
-    let params = par! {
-        "peer_id": ctx.peer_id,
-        "role": if ctx.object.admin.expect("Expect field: admin") == 1 { "admin" } else { "member" },
-        "user_id": ctx.object.user_id.expect("Expect field: user_id"),
-    };
+pub struct SetAdmin {
+    pub(crate) vk_client: VKAPI,
+}
 
-    ctx.client.api_request("messages.setRole", params).await?;
+#[async_trait::async_trait]
+impl TraitHandler for SetAdmin {
+    const EVENT_TYPE: &'static str = "set_admin";
 
-    Ok(PxollyResponse::Success)
+    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+        let params = par! {
+            "peer_id": ctx.peer_id().await?,
+            "role": if ctx.object.admin.expect("Expect field: admin") == 1 { "admin" } else { "member" },
+            "user_id": ctx.object.user_id.expect("Expect field: user_id"),
+        };
+        self.vk_client
+            .api_request("messages.setRole", params)
+            .await?;
+
+        Ok(PxollyResponse::Success)
+    }
 }

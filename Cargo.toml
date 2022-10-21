@@ -4,7 +4,7 @@ version = "0.3.0"
 edition = "2021"
 
 [dependencies]
-reqwest = { version = "0.11.3", features = ["json", "rustls-tls-native-roots"], default-features = false }
+reqwest = { version = "0.11.3", features = ["json", "rustls-tls-native-roots", "multipart"], default-features = false }
 config = { version = "0.13.2", features = ["toml"] }
 tokio = { version = "1.5.0", features = ["full"] }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
@@ -14,3 +14,4 @@ simple_logger = "2.1.0"
 thiserror = "1.0.29"
 public-ip = "0.2.2"
 axum = "0.5.15"
+async-trait = "0.1.57"

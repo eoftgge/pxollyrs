@@ -8,7 +8,7 @@ pub struct EventsGet {
 impl TraitHandler for EventsGet {
     const EVENT_TYPE: &'static str = "events_get";
 
-    async fn execute(&self, _: PxollyContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
         Ok(PxollyResponse::Text(self.handlers.join(",")))
     }
 }

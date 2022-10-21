@@ -1,4 +1,4 @@
-use crate::errors::{PxollyResult, WebhookError};
+use crate::errors::{WebhookError, WebhookResult};
 use crate::vk::responses::{VKAPIRequestParams, VKAPIResponse};
 use reqwest::Client;
 use serde::de::DeserializeOwned;
@@ -32,7 +32,7 @@ impl VKAPI {
         &self,
         method: impl Into<String>,
         params: impl Serialize,
-    ) -> PxollyResult<T> {
+    ) -> WebhookResult<T> {
         let response = self
             .client
             .post(self.create_url(method.into()))
@@ -46,7 +46,7 @@ impl VKAPI {
 
         match response {
             VKAPIResponse::Response(response) => Ok(response),
-            VKAPIResponse::Error(error) => Err(WebhookError::API(error)),
+            VKAPIResponse::Error(error) => Err(WebhookError::VKAPI(error)),
         }
     }
 
@@ -54,7 +54,7 @@ impl VKAPI {
         format!("{}{}", API_URL, method_name)
     }
 
-    fn create_params(&self, params: impl Serialize) -> PxollyResult<VKAPIRequestParams> {
+    fn create_params(&self, params: impl Serialize) -> WebhookResult<VKAPIRequestParams> {
         Ok(VKAPIRequestParams {
             access_token: &*self.access_token,
             version: &*self.version,

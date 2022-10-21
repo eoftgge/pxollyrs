@@ -22,7 +22,7 @@ impl ChatPhotoUpdate {
 impl TraitHandler for ChatPhotoUpdate {
     const EVENT_TYPE: &'static str = "chat_photo_update";
 
-    async fn execute(&self, ctx: PxollyContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let response_url = self
             .api_client
             .api_request::<Value>(

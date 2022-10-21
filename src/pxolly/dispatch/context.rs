@@ -1,7 +1,7 @@
 use crate::errors::WebhookError;
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
-use crate::PxollyResult;
+use crate::WebhookResult;
 
 #[derive(Debug)]
 pub struct PxollyContext {
@@ -14,9 +14,9 @@ impl PxollyContext {
         Self { event, peer_id }
     }
 
-    pub fn peer_id(&self) -> PxollyResult<u64> {
+    pub fn peer_id(&self) -> WebhookResult<u64> {
         self.peer_id
-            .ok_or(WebhookError::Response(PxollyResponse::ErrorCode(-2)))
+            .ok_or(WebhookError::PxollyResponse(PxollyResponse::ErrorCode(-2)))
     }
 }
 

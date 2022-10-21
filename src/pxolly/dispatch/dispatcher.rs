@@ -1,4 +1,4 @@
-use crate::pxolly::traits::TraitHandler;
+use crate::pxolly::dispatch::traits::TraitHandler;
 use std::sync::Arc;
 
 pub static mut EVENT_TYPES_HANDLERS: Vec<&'static str> = Vec::new();

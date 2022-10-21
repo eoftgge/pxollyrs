@@ -1,21 +1,17 @@
-use crate::database::DatabaseJSON;
-use crate::errors::WebhookError;
-use crate::pxolly::context::PxollyContext;
-use crate::pxolly::traits::TraitHandler;
-use crate::pxolly::types::responses::PxollyResponse;
-use crate::vk::api::VKAPI;
-use crate::{par, PxollyResult};
+use crate::database::conn::DatabaseConn;
+use crate::database::models::DatabaseChatModel;
+use crate::handlers::prelude::*;
 
 pub struct Sync {
-    pub(crate) client: VKAPI,
-    pub(crate) database: DatabaseJSON,
+    pub(crate) api_client: VKAPI,
+    pub(crate) conn: DatabaseConn,
 }
 
 #[async_trait::async_trait]
 impl TraitHandler for Sync {
     const EVENT_TYPE: &'static str = "sync";
 
-    async fn execute(&self, ctx: PxollyContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let message = ctx.object.message.as_ref().expect("Expect field: message");
         let params = par! {
             "code": EXECUTE_SYNC_CODE,
@@ -26,16 +22,21 @@ impl TraitHandler for Sync {
         };
         let chat_id = ctx.object.chat_id.as_ref().expect("Expect field: chat_id");
 
-        if self.database.contains(chat_id).await {
+        if DatabaseChatModel::contains(chat_id, &self.conn).await? {
             return Ok(PxollyResponse::ErrorCode(5));
         }
 
-        let peer_id = self.client.api_request::<i64>("execute", params).await?;
+        let peer_id = self
+            .api_client
+            .api_request::<i64>("execute", params)
+            .await?;
 
-        self.database
-            .insert(chat_id.as_str(), peer_id as u64)
-            .await
-            .map_err(|_| WebhookError::Response(PxollyResponse::ErrorCode(3)))?;
+        DatabaseChatModel {
+            chat_uid: peer_id,
+            chat_id: chat_id.into(),
+        }
+        .insert(&self.conn)
+        .await?;
 
         Ok(PxollyResponse::ConfirmationCode(
             ctx.object

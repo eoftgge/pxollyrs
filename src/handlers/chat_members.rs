@@ -1,19 +1,19 @@
 use super::prelude::*;
 
 pub struct ChatMembers {
-    pub(crate) client: VKAPI,
+    pub(crate) api_client: VKAPI,
 }
 
 #[async_trait::async_trait]
 impl TraitHandler for ChatMembers {
     const EVENT_TYPE: &'static str = "chat_members";
 
-    async fn execute(&self, ctx: PxollyContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "chat_id": ctx.peer_id()? - 2_000_000_000,
         };
         let response = self
-            .client
+            .api_client
             .api_request::<serde_json::Value>("messages.getChat", params)
             .await?;
         let users = response

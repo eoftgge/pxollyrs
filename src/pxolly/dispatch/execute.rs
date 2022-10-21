@@ -1,10 +1,9 @@
 use super::context::PxollyContext;
 use super::dispatcher::{Dispatcher, DispatcherBuilder};
 use super::traits::TraitHandler;
-use super::types::events::PxollyEvent;
-use super::types::responses::PxollyResponse;
-use crate::database::DatabaseJSON;
-use crate::errors::{PxollyResult, WebhookError};
+use crate::errors::{WebhookError, WebhookResult};
+use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::responses::PxollyResponse;
 use axum::body::Body;
 use axum::extract::{FromRequest, RequestParts};
 use axum::handler::Handler;
@@ -17,12 +16,12 @@ use std::sync::Arc;
 
 #[async_trait::async_trait]
 pub trait Execute: Send + Sync + Clone {
-    async fn execute(&self, ctx: PxollyContext) -> PxollyResult<PxollyResponse>;
+    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse>;
 }
 
 #[async_trait::async_trait]
 impl Execute for DispatcherBuilder {
-    async fn execute(&self, _: PxollyContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
         Ok(PxollyResponse::ErrorCode(0))
     }
 }
@@ -33,7 +32,7 @@ where
     Handler: TraitHandler,
     Tail: Execute + Send + Sync + 'static,
 {
-    async fn execute(&self, ctx: PxollyContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         if Handler::EVENT_TYPE == ctx.event_type {
             return self.handler.execute(ctx).await;
         }
@@ -45,15 +44,13 @@ where
 pub struct Executor<E: Execute> {
     executor: Arc<E>,
     secret_key: String,
-    database: DatabaseJSON,
 }
 
 impl<E: Execute> Executor<E> {
-    pub fn new(executor: E, secret_key: impl Into<String>, database: DatabaseJSON) -> Self {
+    pub fn new(executor: E, secret_key: impl Into<String>) -> Self {
         Self {
             executor: Arc::new(executor),
             secret_key: secret_key.into(),
-            database,
         }
     }
 
@@ -65,17 +62,16 @@ impl<E: Execute> Executor<E> {
         }
 
         let peer_id = match event.object.chat_id.as_ref() {
-            Some(chat_id) => self.database.get(chat_id).await,
             _ => None,
         };
         let ctx = PxollyContext::new(event, peer_id);
         let response = match self.executor.execute(ctx).await {
             Ok(response) => response,
-            Err(WebhookError::API(err)) => {
+            Err(WebhookError::VKAPI(err)) => {
                 log::error!("in the dispatcher occurred api error: {:?}", err);
                 PxollyResponse::ErrorCode(-1)
             }
-            Err(WebhookError::Response(response)) => response,
+            Err(WebhookError::PxollyResponse(response)) => response,
             Err(WebhookError::IO(err)) => {
                 log::error!("in the dispatcher occurred io error: {:?}", err);
                 PxollyResponse::ErrorCode(3)

@@ -1,11 +1,8 @@
+pub mod edit_settings;
+pub mod get_settings;
+
 use axum::response::{IntoResponse, Response};
 
-/// Responses:
-/// Text(String) -> return text (for example: Text("API.messages.send({ ... });"))
-/// ConfirmationCode(String) -> return code for confirm
-/// ErrorCode(u8) -> return error code
-/// Success -> return 1
-/// Locked -> ip isn't pxolly
 #[derive(Debug)]
 pub enum PxollyResponse {
     Text(String),

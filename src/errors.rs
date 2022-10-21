@@ -1,5 +1,6 @@
+use crate::pxolly::api::responses::PxollyAPIError;
 use crate::pxolly::types::responses::PxollyResponse;
-use crate::vk::responses::VKAPIResponseError;
+use crate::vk::responses::VKAPIError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -12,10 +13,12 @@ pub enum WebhookError {
     Serde(#[from] serde_json::Error),
     #[error("Error in reqwest: {0}")]
     HTTP(#[from] reqwest::Error),
-    #[error("APIError({}) - {}", .0.error_code, .0.error_msg)]
-    API(VKAPIResponseError),
+    #[error("VKAPI({}) - {}", .0.error_code, .0.error_msg)]
+    VKAPI(VKAPIError),
     #[error("Returning error code")]
-    Response(PxollyResponse),
+    PxollyResponse(PxollyResponse),
+    #[error("PxollyError({}) - {}", .0.error_code, .0.error_text)]
+    PxollyAPI(PxollyAPIError),
     #[error("{0}")]
     Message(String),
 }
@@ -26,4 +29,4 @@ impl From<&str> for WebhookError {
     }
 }
 
-pub type PxollyResult<T> = Result<T, WebhookError>;
+pub type WebhookResult<T> = Result<T, WebhookError>;

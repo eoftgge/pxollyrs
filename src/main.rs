@@ -1,36 +1,33 @@
 use axum::{routing::post, Router};
+use pxollyrs::bind_webhook;
 use pxollyrs::config::WebhookConfig;
-use pxollyrs::database::DatabaseJSON;
+use pxollyrs::database::conn::DatabaseConn;
 use pxollyrs::handlers::build_dispatcher;
-use pxollyrs::pxolly::execute::Executor;
-use pxollyrs::utils::{bind_webhook, get_addr_and_url, get_confirmation_code};
+use pxollyrs::pxolly::api::PxollyAPI;
+use pxollyrs::pxolly::dispatch::execute::Executor;
 use pxollyrs::vk::api::VKAPI;
-use pxollyrs::PxollyResult;
+use std::sync::Arc;
 
 #[tokio::main]
-async fn main() -> PxollyResult<()> {
-    simple_logger::init_with_level(log::Level::Debug).unwrap();
-
-    // setting
+async fn main() -> pxollyrs::errors::WebhookResult<()> {
     let config = WebhookConfig::new().await?;
-    let confirmation_code = get_confirmation_code(&config.pxolly().token()).await?;
-    let (addr, url) = get_addr_and_url(config.application().server()).await?;
+    config.application().logger().set_level();
 
-    // applications
-    let client = VKAPI::new(config.vk().token(), config.vk().version());
-    let database = DatabaseJSON::new("chats").await?;
-    let dispatcher = build_dispatcher(confirmation_code, client, &database);
-    let executor = Executor::new(dispatcher, config.pxolly().secret_key(), database);
+    let (addr, url) = config.application().server().addr_and_url().await?;
+    let client = Arc::new(reqwest::Client::new());
+    let pxolly = PxollyAPI::new(client.clone(), config.pxolly().token());
+    let vk = VKAPI::new(client.clone(), config.vk().token(), config.vk().version());
+    let database = DatabaseConn::new(config.application().database().path()).await?;
+    let dispatcher = build_dispatcher(pxolly, vk, database);
+    let executor = Executor::new(dispatcher, config.pxolly().secret_key());
     let router = Router::new().route("/", post(executor));
 
-    // log
     log::info!("Addr: {}", addr);
     log::info!("Server is starting!");
 
-    // run
     let (_, _) = tokio::join! {
         axum::Server::bind(&addr).serve(router.into_make_service()),
-        bind_webhook(config.application().is_bind, &config.pxolly(), url)
+        bind_webhook(config.application().is_bind, config.pxolly(), url)
     };
 
     Ok(())

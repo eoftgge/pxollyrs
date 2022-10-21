@@ -1,26 +1,26 @@
 use super::prelude::*;
 
 pub struct InviteUser {
-    pub(crate) client: VKAPI,
+    pub(crate) api_client: VKAPI,
 }
 
 #[async_trait::async_trait]
 impl TraitHandler for InviteUser {
     const EVENT_TYPE: &'static str = "invite_user";
 
-    async fn execute(&self, ctx: PxollyContext) -> PxollyResult<PxollyResponse> {
+    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "visible_messages_count": ctx.object.visible_messages_count.unwrap_or(0),
             "member_id": ctx.object.user_id.expect("Expect field: user_id"),
             "chat_id": ctx.peer_id()? - 2_000_000_000,
             "code": EXECUTE_INVITE_CODE,
         };
-        let response = match self.client.api_request::<i64>("execute", params).await {
+        let response = match self.api_client.api_request::<i64>("execute", params).await {
             Ok(ok) => match ok {
                 -100 => PxollyResponse::ErrorCode(-1),
                 _ => PxollyResponse::Success,
             },
-            Err(WebhookError::API(_)) => PxollyResponse::ErrorCode(0),
+            Err(WebhookError::VKAPI(_)) => PxollyResponse::ErrorCode(0),
             _ => PxollyResponse::Text("internal".into()),
         };
 

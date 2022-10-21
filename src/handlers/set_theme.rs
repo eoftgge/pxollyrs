@@ -1,8 +1,9 @@
 use super::prelude::*;
+use crate::vk::responses::VKAPIError;
 use serde_json::Value;
 
 pub struct SetTheme {
-    pub(crate) api_client: VKAPI,
+    pub(crate) vk_client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -11,16 +12,19 @@ impl TraitHandler for SetTheme {
 
     async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
-            "peer_id": ctx.peer_id()?,
+            "peer_id": ctx.peer_id().await?,
             "style": ctx.object.style.as_ref().expect("Expect field: style")
         };
         let response = match self
-            .api_client
+            .vk_client
             .api_request::<Value>("messages.setConversationStyle", params)
             .await
         {
             Ok(_) => PxollyResponse::Success,
-            Err(WebhookError::VKAPI(_)) => PxollyResponse::ErrorCode(0),
+            Err(WebhookError::VKAPI(VKAPIError { error_code, .. })) => match error_code {
+                966 => PxollyResponse::ErrorCode(-1),
+                _ => PxollyResponse::ErrorCode(0),
+            },
             _ => PxollyResponse::ErrorCode(2),
         };
 

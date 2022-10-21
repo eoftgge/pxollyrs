@@ -22,6 +22,16 @@ impl EditSettingsBuilder {
             secret_key: None,
         }
     }
+
+    pub fn url(mut self, url: impl Into<String>) -> Self {
+        self.url = Some(url.into());
+        self
+    }
+
+    pub fn secret_key(mut self, secret_key: impl Into<String>) -> Self {
+        self.secret_key = Some(secret_key.into());
+        self
+    }
 }
 
 impl std::future::IntoFuture for EditSettingsBuilder {

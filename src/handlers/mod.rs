@@ -21,48 +21,51 @@ pub mod prelude {
     pub use crate::vk::api::VKAPI;
 }
 
-use crate::database::conn::DatabaseConn;
-use crate::pxolly::api::PxollyAPI;
 use crate::pxolly::dispatch::dispatcher::{DispatcherBuilder, PushHandler, EVENT_TYPES_HANDLERS};
 use crate::pxolly::dispatch::execute::Execute;
 use crate::vk::api::VKAPI;
+use reqwest::Client;
+use std::sync::Arc;
 
 pub fn build_dispatcher(
-    pxolly_client: PxollyAPI,
-    api_client: VKAPI,
-    conn: DatabaseConn,
+    vk_client: VKAPI,
+    http_client: Arc<Client>,
+    confirmation_code: String,
 ) -> impl Execute {
     DispatcherBuilder
         .push_handler(chat_members::ChatMembers {
-            api_client: api_client.clone(),
+            vk_client: vk_client.clone(),
         })
-        .push_handler(chat_photo_update::ChatPhotoUpdate::new(api_client.clone()))
+        .push_handler(chat_photo_update::ChatPhotoUpdate {
+            vk_client: vk_client.clone(),
+            http_client,
+        })
         .push_handler(delete_for_all::DeleteForAll {
-            api_client: api_client.clone(),
+            vk_client: vk_client.clone(),
         })
         .push_handler(execute::Execute {
-            api_client: api_client.clone(),
+            vk_client: vk_client.clone(),
         })
         .push_handler(group_ban::GroupBan {
-            api_client: api_client.clone(),
+            vk_client: vk_client.clone(),
         })
         .push_handler(group_unban::GroupUnban {
-            api_client: api_client.clone(),
+            vk_client: vk_client.clone(),
         })
         .push_handler(invite_user::InviteUser {
-            api_client: api_client.clone(),
+            vk_client: vk_client.clone(),
         })
         .push_handler(reset_theme::ResetTheme {
-            api_client: api_client.clone(),
+            vk_client: vk_client.clone(),
         })
         .push_handler(set_admin::SetAdmin {
-            api_client: api_client.clone(),
+            vk_client: vk_client.clone(),
         })
         .push_handler(set_theme::SetTheme {
-            api_client: api_client.clone(),
+            vk_client: vk_client.clone(),
         })
-        .push_handler(sync::Sync { api_client, conn })
-        .push_handler(confirmation::Confirmation { pxolly_client }) // WARNING: IT'S ALWAYS PENULTIMATE
+        .push_handler(sync::Sync { vk_client })
+        .push_handler(confirmation::Confirmation { confirmation_code }) // WARNING: IT'S ALWAYS PENULTIMATE
         .push_handler(events_get::EventsGet {
             handlers: unsafe { EVENT_TYPES_HANDLERS.clone() }, // IT SAFE CODE!!!! I SWEAR BY MY MOM!!!!
         }) // WARNING: IT'S ALWAYS LAST!!!

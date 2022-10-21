@@ -1,6 +1,5 @@
 .idea
 target
-config.toml
-chats.json
-Dockerfile
-Cargo.lock
+/config.toml
+/Cargo.lock
+/chat.json

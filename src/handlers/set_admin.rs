@@ -1,7 +1,7 @@
 use super::prelude::*;
 
 pub struct SetAdmin {
-    pub(crate) api_client: VKAPI,
+    pub(crate) vk_client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -10,11 +10,11 @@ impl TraitHandler for SetAdmin {
 
     async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
-            "peer_id": ctx.peer_id()?,
+            "peer_id": ctx.peer_id().await?,
             "role": if ctx.object.admin.expect("Expect field: admin") == 1 { "admin" } else { "member" },
             "user_id": ctx.object.user_id.expect("Expect field: user_id"),
         };
-        self.api_client
+        self.vk_client
             .api_request("messages.setRole", params)
             .await?;
 

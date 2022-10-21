@@ -1,7 +1,7 @@
 use super::prelude::*;
 
 pub struct ChatMembers {
-    pub(crate) api_client: VKAPI,
+    pub(crate) vk_client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -10,10 +10,10 @@ impl TraitHandler for ChatMembers {
 
     async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
-            "chat_id": ctx.peer_id()? - 2_000_000_000,
+            "chat_id": ctx.peer_id().await? - 2_000_000_000,
         };
         let response = self
-            .api_client
+            .vk_client
             .api_request::<serde_json::Value>("messages.getChat", params)
             .await?;
         let users = response

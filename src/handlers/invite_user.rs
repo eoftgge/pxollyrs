@@ -1,7 +1,7 @@
 use super::prelude::*;
 
 pub struct InviteUser {
-    pub(crate) api_client: VKAPI,
+    pub(crate) vk_client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -12,10 +12,10 @@ impl TraitHandler for InviteUser {
         let params = par! {
             "visible_messages_count": ctx.object.visible_messages_count.unwrap_or(0),
             "member_id": ctx.object.user_id.expect("Expect field: user_id"),
-            "chat_id": ctx.peer_id()? - 2_000_000_000,
+            "chat_id": ctx.peer_id().await? - 2_000_000_000,
             "code": EXECUTE_INVITE_CODE,
         };
-        let response = match self.api_client.api_request::<i64>("execute", params).await {
+        let response = match self.vk_client.api_request::<i64>("execute", params).await {
             Ok(ok) => match ok {
                 -100 => PxollyResponse::ErrorCode(-1),
                 _ => PxollyResponse::Success,

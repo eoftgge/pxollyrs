@@ -1,10 +1,8 @@
-use crate::database::conn::DatabaseConn;
 use crate::database::models::DatabaseChatModel;
 use crate::handlers::prelude::*;
 
 pub struct Sync {
-    pub(crate) api_client: VKAPI,
-    pub(crate) conn: DatabaseConn,
+    pub(crate) vk_client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -22,20 +20,17 @@ impl TraitHandler for Sync {
         };
         let chat_id = ctx.object.chat_id.as_ref().expect("Expect field: chat_id");
 
-        if DatabaseChatModel::contains(chat_id, &self.conn).await? {
+        if DatabaseChatModel::contains(chat_id, &ctx.conn()).await? {
             return Ok(PxollyResponse::ErrorCode(5));
         }
 
-        let peer_id = self
-            .api_client
-            .api_request::<i64>("execute", params)
-            .await?;
+        let peer_id = self.vk_client.api_request::<i64>("execute", params).await?;
 
         DatabaseChatModel {
             chat_uid: peer_id,
             chat_id: chat_id.into(),
         }
-        .insert(&self.conn)
+        .insert(&ctx.conn())
         .await?;
 
         Ok(PxollyResponse::ConfirmationCode(

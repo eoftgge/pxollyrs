@@ -1,6 +1,7 @@
 use super::context::PxollyContext;
 use super::dispatcher::{Dispatcher, DispatcherBuilder};
 use super::traits::TraitHandler;
+use crate::database::conn::DatabaseConn;
 use crate::errors::{WebhookError, WebhookResult};
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
@@ -44,13 +45,15 @@ where
 pub struct Executor<E: Execute> {
     executor: Arc<E>,
     secret_key: String,
+    conn: DatabaseConn,
 }
 
 impl<E: Execute> Executor<E> {
-    pub fn new(executor: E, secret_key: impl Into<String>) -> Self {
+    pub fn new(executor: E, conn: DatabaseConn, secret_key: impl Into<String>) -> Self {
         Self {
             executor: Arc::new(executor),
             secret_key: secret_key.into(),
+            conn,
         }
     }
 
@@ -61,10 +64,7 @@ impl<E: Execute> Executor<E> {
             return PxollyResponse::Locked;
         }
 
-        let peer_id = match event.object.chat_id.as_ref() {
-            _ => None,
-        };
-        let ctx = PxollyContext::new(event, peer_id);
+        let ctx = PxollyContext::new(event, self.conn.clone());
         let response = match self.executor.execute(ctx).await {
             Ok(response) => response,
             Err(WebhookError::VKAPI(err)) => {

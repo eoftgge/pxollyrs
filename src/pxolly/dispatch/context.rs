@@ -1,22 +1,42 @@
-use crate::errors::WebhookError;
+use crate::database::conn::DatabaseConn;
+use crate::database::models::DatabaseChatModel;
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
-use crate::WebhookResult;
+use crate::{WebhookError, WebhookResult};
 
 #[derive(Debug)]
 pub struct PxollyContext {
     event: PxollyEvent,
-    peer_id: Option<u64>,
+    conn: DatabaseConn,
 }
 
 impl PxollyContext {
-    pub fn new(event: PxollyEvent, peer_id: Option<u64>) -> Self {
-        Self { event, peer_id }
+    pub fn new(event: PxollyEvent, conn: DatabaseConn) -> Self {
+        Self { event, conn }
     }
 
-    pub fn peer_id(&self) -> WebhookResult<u64> {
-        self.peer_id
-            .ok_or(WebhookError::PxollyResponse(PxollyResponse::ErrorCode(-2)))
+    pub fn conn(&self) -> DatabaseConn {
+        self.conn.clone()
+    }
+
+    pub async fn chat(&self) -> WebhookResult<Option<DatabaseChatModel>> {
+        DatabaseChatModel::find(
+            self.object
+                .chat_id
+                .as_ref()
+                .expect("Expected field `chat_id`"),
+            &self.conn,
+        )
+        .await
+        .map_err(|_| WebhookError::PxollyResponse(PxollyResponse::ErrorCode(3)))
+    }
+
+    pub async fn peer_id(&self) -> WebhookResult<i64> {
+        Ok(self
+            .chat()
+            .await?
+            .ok_or(WebhookError::PxollyResponse(PxollyResponse::ErrorCode(-2)))?
+            .chat_uid)
     }
 }
 

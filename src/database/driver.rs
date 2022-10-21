@@ -12,22 +12,24 @@ impl DatabaseDriver {
         Self { file }
     }
 
-    pub(crate) async fn truncate(&mut self) -> WebhookResult<u64> {
+    pub async fn truncate(&mut self) -> WebhookResult<u64> {
         Ok(self.file.seek(SeekFrom::Start(0)).await?)
     }
 
-    pub(crate) async fn write(&mut self, buf: &[u8]) -> WebhookResult<()> {
-        Ok(self.file.write_all(buf).await?)
+    pub async fn write(&mut self, buf: &[u8]) -> WebhookResult<()> {
+        self.file.write_all(buf).await?;
+        Ok(self.file.flush().await?)
     }
 
-    pub(crate) async fn rewrite(&mut self, buf: &[u8]) -> WebhookResult<()> {
+    pub async fn rewrite(&mut self, buf: &[u8]) -> WebhookResult<()> {
         self.truncate().await?;
         self.write(buf).await
     }
 
-    pub(crate) async fn read(&mut self) -> WebhookResult<String> {
-        let mut buf = String::new();
-        self.file.read_to_string(&mut buf).await?;
+    pub async fn read(&mut self) -> WebhookResult<Vec<u8>> {
+        let mut buf = Vec::new();
+        self.file.seek(SeekFrom::Start(0)).await?;
+        self.file.read_to_end(&mut buf).await?;
         Ok(buf)
     }
 }

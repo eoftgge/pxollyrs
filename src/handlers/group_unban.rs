@@ -2,7 +2,7 @@ use super::prelude::*;
 use serde_json::Value;
 
 pub struct GroupUnban {
-    pub(crate) api_client: VKAPI,
+    pub(crate) vk_client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -15,7 +15,7 @@ impl TraitHandler for GroupUnban {
             "owner_id": ctx.object.user_id.expect("Expect field: owner_id")
         };
         let response = match self
-            .api_client
+            .vk_client
             .api_request::<Value>("groups.unban", params)
             .await
         {

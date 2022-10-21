@@ -1,21 +1,13 @@
 use reqwest::multipart::{Form, Part};
 use reqwest::Client;
 use serde_json::Value;
+use std::sync::Arc;
 
 use crate::handlers::prelude::*;
 
 pub struct ChatPhotoUpdate {
-    api_client: VKAPI,
-    http_client: Client,
-}
-
-impl ChatPhotoUpdate {
-    pub fn new(api_client: VKAPI) -> Self {
-        Self {
-            api_client,
-            http_client: Client::new(),
-        }
-    }
+    pub(crate) vk_client: VKAPI,
+    pub(crate) http_client: Arc<Client>,
 }
 
 #[async_trait::async_trait]
@@ -24,11 +16,11 @@ impl TraitHandler for ChatPhotoUpdate {
 
     async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let response_url = self
-            .api_client
+            .vk_client
             .api_request::<Value>(
                 "photos.getChatUploadServer",
                 par! {
-                    "chat_id": ctx.peer_id()? - 2_000_000_000
+                    "chat_id": ctx.peer_id().await? - 2_000_000_000
                 },
             )
             .await?;
@@ -57,7 +49,7 @@ impl TraitHandler for ChatPhotoUpdate {
             .ok_or_else(|| WebhookError::from("response isn't str...."))?
             as &str;
         let _ = self
-            .api_client
+            .vk_client
             .api_request::<Value>(
                 "messages.setChatPhoto",
                 par! {

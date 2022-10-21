@@ -1,7 +1,7 @@
 use super::prelude::*;
 
 pub struct ResetTheme {
-    pub(crate) api_client: VKAPI,
+    pub(crate) vk_client: VKAPI,
 }
 
 #[async_trait::async_trait]
@@ -10,10 +10,10 @@ impl TraitHandler for ResetTheme {
 
     async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
-            "peer_id": ctx.peer_id()?
+            "peer_id": ctx.peer_id().await?
         };
 
-        self.api_client
+        self.vk_client
             .api_request("messages.resetConversationStyle", params)
             .await?;
         Ok(PxollyResponse::Success)

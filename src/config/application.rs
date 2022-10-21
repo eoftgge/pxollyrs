@@ -1,5 +1,6 @@
-use crate::{Url, WebhookResult};
+use crate::WebhookResult;
 use log::Level;
+use reqwest::Url;
 use serde::Deserialize;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::path::PathBuf;
@@ -35,25 +36,25 @@ pub struct ServerConfig {
 }
 
 impl ServerConfig {
-    pub async fn addr_and_url(&self) -> WebhookResult<(SocketAddr, Url)> {
-        let url: Url;
-        let addr: SocketAddr;
+    pub async fn addr_and_host(&self) -> WebhookResult<(SocketAddr, Url)> {
+        let result_host: Url;
+        let result_addr: SocketAddr;
         let port = self.port;
 
         if let Some(host) = self.host.as_ref() {
-            addr = SocketAddr::new(self.ip.unwrap_or(IpAddr::V4(Ipv4Addr::LOCALHOST)), port);
-            url = Url::from_str(host).expect("`config.host` is invalid");
+            result_addr = SocketAddr::new(self.ip.unwrap_or(IpAddr::V4(Ipv4Addr::LOCALHOST)), port);
+            result_host = Url::from_str(host).expect("`config.host` is invalid");
         } else if let Some(ip) = self.ip {
-            addr = SocketAddr::new(ip, port);
-            url = Url::from_str(&*format!("https://{}:{}", ip, port)).unwrap();
+            result_addr = SocketAddr::new(ip, port);
+            result_host = Url::from_str(&*format!("https://{}:{}", ip, port)).unwrap();
         } else if let Some(ip) = public_ip::addr().await {
-            addr = SocketAddr::new(ip, port);
-            url = Url::from_str(&*format!("https://{}:{}", ip, port)).unwrap();
+            result_addr = SocketAddr::new(ip, port);
+            result_host = Url::from_str(&*format!("https://{}:{}", ip, port)).unwrap();
         } else {
             panic!("Your internet hasn't public IP...")
         }
 
-        Ok((addr, url))
+        Ok((result_addr, result_host))
     }
 }
 

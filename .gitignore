@@ -1,5 +1,7 @@
 .idea
 target
+cross
 /config.toml
 /Cargo.lock
 /chat.json
+/Cross.toml

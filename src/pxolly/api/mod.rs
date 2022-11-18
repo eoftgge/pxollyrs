@@ -11,7 +11,7 @@ use serde::Serialize;
 use std::fmt::Debug;
 use std::sync::Arc;
 
-const API_URL: &str = "https://api.pxolly.ru/m/";
+const API_URL: &str = "https://api.pxolly.com/m/";
 
 #[derive(Clone)]
 pub struct PxollyAPI {

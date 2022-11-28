@@ -1,6 +1,9 @@
-on:
-  release:
-    types: [created]
+name: Release
+
+on: [push, pull_request]
+
+permissions:
+  contents: write
 
 jobs:
   release:

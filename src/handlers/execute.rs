@@ -6,10 +6,10 @@ pub struct Execute {
 }
 
 #[async_trait::async_trait]
-impl TraitHandler for Execute {
+impl Handler for Execute {
     const EVENT_TYPE: &'static str = "execute";
 
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "code": ctx.object.code.as_ref().expect("Expect field: code"),
             "chat_id": ctx.peer_id().await?,

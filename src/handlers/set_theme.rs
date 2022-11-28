@@ -7,14 +7,15 @@ pub struct SetTheme {
 }
 
 #[async_trait::async_trait]
-impl TraitHandler for SetTheme {
+impl Handler for SetTheme {
     const EVENT_TYPE: &'static str = "set_theme";
 
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "peer_id": ctx.peer_id().await?,
             "style": ctx.object.style.as_ref().expect("Expect field: style")
         };
+
         let response = match self
             .vk_client
             .api_request::<Value>("messages.setConversationStyle", params)

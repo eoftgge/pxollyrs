@@ -9,10 +9,14 @@ pub enum WebhookError {
     Config(#[from] config::ConfigError),
     #[error("Error in IO: {0}")]
     IO(#[from] std::io::Error),
-    #[error("Error in serde: {0}")]
-    Serde(#[from] serde_json::Error),
+    #[error("Error in json ser/de: {0}")]
+    Json(#[from] serde_json::Error),
     #[error("Error in reqwest: {0}")]
-    HTTP(#[from] reqwest::Error),
+    Http(#[from] reqwest::Error),
+    #[error("Error in msgpack encode: {0}")]
+    RmpEncoded(#[from] rmp_serde::encode::Error),
+    #[error("Error in msgpack decode: {0}")]
+    RmpDecoded(#[from] rmp_serde::decode::Error),
     #[error("VKAPI({}) - {}", .0.error_code, .0.error_msg)]
     VKAPI(VKAPIError),
     #[error("Returning error code")]

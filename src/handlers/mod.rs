@@ -16,13 +16,13 @@ pub mod prelude {
     pub use crate::errors::{WebhookError, WebhookResult};
     pub use crate::par;
     pub use crate::pxolly::dispatch::context::PxollyContext;
-    pub use crate::pxolly::dispatch::traits::TraitHandler;
+    pub use crate::pxolly::dispatch::handler::Handler;
     pub use crate::pxolly::types::responses::PxollyResponse;
     pub use crate::vk::api::VKAPI;
 }
 
 use crate::pxolly::dispatch::dispatcher::{DispatcherBuilder, PushHandler, EVENT_TYPES_HANDLERS};
-use crate::pxolly::dispatch::execute::Execute;
+use crate::pxolly::dispatch::execute::Dispatch;
 use crate::vk::api::VKAPI;
 use reqwest::Client;
 use std::sync::Arc;
@@ -31,7 +31,7 @@ pub fn build_dispatcher(
     vk_client: VKAPI,
     http_client: Arc<Client>,
     confirmation_code: String,
-) -> impl Execute {
+) -> impl Dispatch {
     DispatcherBuilder
         .push_handler(chat_members::ChatMembers {
             vk_client: vk_client.clone(),

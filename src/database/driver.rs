@@ -12,13 +12,16 @@ impl DatabaseDriver {
         Self { file }
     }
 
-    pub async fn truncate(&mut self) -> WebhookResult<u64> {
-        Ok(self.file.seek(SeekFrom::Start(0)).await?)
+    pub async fn truncate(&mut self) -> WebhookResult<()> {
+        self.file.set_len(0).await?;
+        self.file.rewind().await?;
+        Ok(())
     }
 
     pub async fn write(&mut self, buf: &[u8]) -> WebhookResult<()> {
         self.file.write_all(buf).await?;
-        Ok(self.file.flush().await?)
+        self.file.flush().await?;
+        Ok(())
     }
 
     pub async fn rewrite(&mut self, buf: &[u8]) -> WebhookResult<()> {

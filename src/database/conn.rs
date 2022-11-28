@@ -30,7 +30,9 @@ impl DatabaseConn {
         file.read_to_end(&mut buf).await?;
 
         if buf.is_empty() {
+            log::warn!("The file database is empty, so an empty array will be inserted.");
             file.write_all(b"[]").await?;
+            file.flush().await?;
         }
 
         Ok(Self {

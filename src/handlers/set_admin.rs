@@ -5,10 +5,10 @@ pub struct SetAdmin {
 }
 
 #[async_trait::async_trait]
-impl TraitHandler for SetAdmin {
+impl Handler for SetAdmin {
     const EVENT_TYPE: &'static str = "set_admin";
 
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "peer_id": ctx.peer_id().await?,
             "role": if ctx.object.admin.expect("Expect field: admin") == 1 { "admin" } else { "member" },

@@ -3,8 +3,8 @@ use crate::pxolly::types::responses::PxollyResponse;
 use crate::WebhookResult;
 
 #[async_trait::async_trait]
-pub trait TraitHandler: Send + Sync {
+pub trait Handler: Send + Sync {
     const EVENT_TYPE: &'static str;
 
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse>;
+    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse>;
 }

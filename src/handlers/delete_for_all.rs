@@ -6,10 +6,10 @@ pub struct DeleteForAll {
 }
 
 #[async_trait::async_trait]
-impl TraitHandler for DeleteForAll {
+impl Handler for DeleteForAll {
     const EVENT_TYPE: &'static str = "delete_for_all";
 
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "peer_id": ctx.peer_id().await?,
             "delete_for_all": 1,

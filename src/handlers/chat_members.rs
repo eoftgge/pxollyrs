@@ -5,10 +5,10 @@ pub struct ChatMembers {
 }
 
 #[async_trait::async_trait]
-impl TraitHandler for ChatMembers {
+impl Handler for ChatMembers {
     const EVENT_TYPE: &'static str = "chat_members";
 
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "chat_id": ctx.peer_id().await? - 2_000_000_000,
         };

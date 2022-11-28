@@ -5,10 +5,10 @@ pub struct EventsGet {
 }
 
 #[async_trait::async_trait]
-impl TraitHandler for EventsGet {
+impl Handler for EventsGet {
     const EVENT_TYPE: &'static str = "events_get";
 
-    async fn execute(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn handle(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
         Ok(PxollyResponse::Text(self.handlers.join(",")))
     }
 }

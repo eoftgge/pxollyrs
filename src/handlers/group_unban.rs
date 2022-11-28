@@ -6,10 +6,10 @@ pub struct GroupUnban {
 }
 
 #[async_trait::async_trait]
-impl TraitHandler for GroupUnban {
+impl Handler for GroupUnban {
     const EVENT_TYPE: &'static str = "group_unban";
 
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "group_id": ctx.object.group_id.expect("Expect field: group_id"),
             "owner_id": ctx.object.user_id.expect("Expect field: owner_id")

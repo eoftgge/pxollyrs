@@ -6,10 +6,10 @@ pub struct GroupBan {
 }
 
 #[async_trait::async_trait]
-impl TraitHandler for GroupBan {
+impl Handler for GroupBan {
     const EVENT_TYPE: &'static str = "group_ban";
 
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "end_date": ctx.object.expired.expect("Expect field: end_date"),
             "group_id": ctx.object.group_id.expect("Expect field: group_id"),

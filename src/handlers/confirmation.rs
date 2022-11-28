@@ -5,10 +5,10 @@ pub struct Confirmation {
 }
 
 #[async_trait::async_trait]
-impl TraitHandler for Confirmation {
+impl Handler for Confirmation {
     const EVENT_TYPE: &'static str = "confirmation";
 
-    async fn execute(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn handle(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
         Ok(PxollyResponse::ConfirmationCode(
             self.confirmation_code.clone(),
         ))

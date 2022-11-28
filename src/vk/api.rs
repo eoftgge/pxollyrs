@@ -56,8 +56,8 @@ impl VKAPI {
 
     fn create_params(&self, params: impl Serialize) -> WebhookResult<VKAPIRequestParams> {
         Ok(VKAPIRequestParams {
-            access_token: &*self.access_token,
-            version: &*self.version,
+            access_token: &self.access_token,
+            version: &self.version,
             others: serde_json::to_value(params)?,
         })
     }

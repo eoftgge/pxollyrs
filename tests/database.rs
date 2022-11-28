@@ -3,11 +3,20 @@ use pxollyrs::WebhookResult;
 
 #[tokio::test]
 async fn test_database() -> WebhookResult<()> {
-    let conn = DatabaseConn::new("chat.json").await?;
-    conn.lock().await.rewrite(b"[1]").await?;
-    let bytes = conn.lock().await.read().await?;
-    assert_eq!(bytes, b"[1]");
+    let conn = DatabaseConn::new("test_chat.json").await?;
+    let mut guard = conn.lock().await;
 
-    conn.lock().await.truncate().await?;
+    let bytes = guard.read().await?;
+    assert_eq!(bytes, b"[]");
+
+    guard.rewrite(b"1").await?;
+    let bytes = guard.read().await?;
+    assert_eq!(bytes, b"1");
+
+    guard.rewrite(b"kek").await?;
+    let bytes = guard.read().await?;
+    assert_eq!(bytes, b"kek");
+
+    tokio::fs::remove_file("test_chat.json").await?;
     Ok(())
 }

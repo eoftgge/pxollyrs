@@ -1,13 +1,12 @@
 use super::context::PxollyContext;
 use super::dispatcher::{Dispatcher, DispatcherBuilder};
-use super::traits::TraitHandler;
+use super::handler::Handler;
 use crate::database::conn::DatabaseConn;
 use crate::errors::{WebhookError, WebhookResult};
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
 use axum::body::Body;
 use axum::extract::{FromRequest, RequestParts};
-use axum::handler::Handler;
 use axum::http::Request;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
@@ -16,42 +15,42 @@ use std::pin::Pin;
 use std::sync::Arc;
 
 #[async_trait::async_trait]
-pub trait Execute: Send + Sync + Clone {
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse>;
+pub trait Dispatch: Send + Sync + Clone {
+    async fn dispatch(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse>;
 }
 
 #[async_trait::async_trait]
-impl Execute for DispatcherBuilder {
-    async fn execute(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
+impl Dispatch for DispatcherBuilder {
+    async fn dispatch(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
         Ok(PxollyResponse::ErrorCode(0))
     }
 }
 
 #[async_trait::async_trait]
-impl<Handler, Tail> Execute for Dispatcher<Handler, Tail>
+impl<H, Tail> Dispatch for Dispatcher<H, Tail>
 where
-    Handler: TraitHandler,
-    Tail: Execute + Send + Sync + 'static,
+    H: Handler,
+    Tail: Dispatch + Send + Sync + 'static,
 {
-    async fn execute(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        if Handler::EVENT_TYPE == ctx.event_type {
-            return self.handler.execute(ctx).await;
+    async fn dispatch(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+        if H::EVENT_TYPE == ctx.event_type {
+            return self.handler.handle(ctx).await;
         }
-        self.tail.execute(ctx).await
+        self.tail.dispatch(ctx).await
     }
 }
 
 #[derive(Clone)]
-pub struct Executor<E: Execute> {
-    executor: Arc<E>,
+pub struct Executor<D: Dispatch> {
+    dispatcher: Arc<D>,
     secret_key: String,
     conn: DatabaseConn,
 }
 
-impl<E: Execute> Executor<E> {
-    pub fn new(executor: E, conn: DatabaseConn, secret_key: impl Into<String>) -> Self {
+impl<D: Dispatch> Executor<D> {
+    pub fn new(dispatcher: D, conn: DatabaseConn, secret_key: impl Into<String>) -> Self {
         Self {
-            executor: Arc::new(executor),
+            dispatcher: Arc::new(dispatcher),
             secret_key: secret_key.into(),
             conn,
         }
@@ -65,7 +64,7 @@ impl<E: Execute> Executor<E> {
         }
 
         let ctx = PxollyContext::new(event, self.conn.clone());
-        let response = match self.executor.execute(ctx).await {
+        let response = match self.dispatcher.dispatch(ctx).await {
             Ok(response) => response,
             Err(WebhookError::VKAPI(err)) => {
                 log::error!("in the dispatcher occurred api error: {:?}", err);
@@ -87,13 +86,13 @@ impl<E: Execute> Executor<E> {
     }
 }
 
-impl<E: Execute + 'static> Handler<()> for Executor<E> {
+impl<E: Dispatch + 'static> axum::handler::Handler<()> for Executor<E> {
     type Future = Pin<Box<dyn Future<Output = Response> + Send>>;
 
     fn call(self, req: Request<Body>) -> Self::Future {
         let mut parts = RequestParts::new(req);
         Box::pin(async move {
-            self.execute(match Json::<PxollyEvent>::from_request(&mut parts).await {
+            self.execute(match Json::from_request(&mut parts).await {
                 Ok(event) => event,
                 Err(err) => return err.into_response(),
             })

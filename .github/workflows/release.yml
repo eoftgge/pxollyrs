@@ -1,77 +1,39 @@
 name: Release
 
-on: [push, pull_request]
-
 permissions:
   contents: write
 
+on:
+  push:
+    tags:
+      - v[0-9]+.*
+
 jobs:
-  release:
-    name: release ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-assets:
     strategy:
       matrix:
-        # rustup target list
         include:
-          - target: x86_64-unknown-linux-gnu
+          - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
-          - target: armv7-unknown-linux-gnueabihf
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
           - target: x86_64-apple-darwin
             os: macos-latest
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Version
-        uses: tcurdt/action-verify-version-cargo@master
-
-      - name: Toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: taiki-e/upload-rust-binary-action@v1
         with:
-          profile: minimal
-          toolchain: stable
+          bin: ...
           target: ${{ matrix.target }}
-          override: true
-
-      - name: Cache Rustup
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.rustup/settings.toml
-            ~/.rustup/toolchains/${{ matrix.target }}-*
-            ~/.rustup/update-hashes/${{ matrix.target }}-*
-          key: run-toolchain-rust_${{ matrix.target }}
-
-      - name: Cache Cargo
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --release --target=${{ matrix.target }}
-
-      - name: Test
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: test
-
-      - name: Upload
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.project }}_${{ matrix.target }}
-          path: |
-            ./target/${{ matrix.target }}/release/${{ env.project }}
-            ./target/${{ matrix.target }}/release/${{ env.project }}.exe
+          token: ${{ secrets.GITHUB_TOKEN }}

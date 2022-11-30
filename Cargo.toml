@@ -16,3 +16,9 @@ public-ip = "0.2.2"
 axum = "0.5.15"
 async-trait = "0.1.57"
 rmp-serde = "1.1.1"
+
+[profile.release]
+strip = true  
+opt-level = "z"
+lto = true
+codegen-units = 1

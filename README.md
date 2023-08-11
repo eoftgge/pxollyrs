@@ -8,7 +8,7 @@ Webhook for @pxolly on Rust
 - А ГЛАВНОЕ НЕ СОДЕРЖИТ **НЕБЕЗОПАСНОЙ** КОДОВОЙ БАЗЫ
 
 ### Настройка
-Для настройки вебхука: вам нужен конфигурационный файл `config.toml` (пример конфигурации config.example.toml) <br>
+Для настройки вебхука: вам нужен конфигурационный файл `config.toml` ([пример](https://github.com/eoftgge/pxollyrs/blob/main/config.example.toml) конфигурации) <br>
 Для работы вебхука *жизненно необходимы* токены от @pxolly, и ВКонтакте. <br>
 Можно получить от ВКонтакте - [тут](https://vkhost.github.io) <br>
 А также от @pxolly в [личных сообщениях](https://vk.me/pxolly) командой `!токен новый` <br>
@@ -25,5 +25,5 @@ cargo run --release
 
 Также имеется альтернативный способ запуска бота: <br>
 - Для начала необходим бинарник. Его можно взять из [Github Releases](https://github.com/eoftgge/pxollyrs/releases) 
-- Настраиваем конфигурационный файл ([пример](https://github.com/eoftgge/pxollyrs/blob/main/config.example.toml))
-- И запускаем совершенно обычным способом бинарник 
+- Закидываем конфигурационный файл вместе с бинарником 
+- И запускаем совершенно обычным способом бинарник (В линуксе `chmod +x pxollyrs && ./pxollyrs`)

@@ -12,8 +12,6 @@ pub struct ChatPhotoUpdate {
 
 #[async_trait::async_trait]
 impl Handler for ChatPhotoUpdate {
-    const EVENT_TYPE: &'static str = "chat_photo_update";
-
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let response_url = self
             .vk_client

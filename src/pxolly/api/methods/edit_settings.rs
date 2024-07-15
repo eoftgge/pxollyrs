@@ -9,6 +9,7 @@ use std::pin::Pin;
 pub struct EditSettingsBuilder {
     url: Option<String>,
     secret_key: Option<String>,
+    is_hidden: bool,
 
     #[serde(skip)]
     api_client: PxollyAPI,
@@ -20,16 +21,22 @@ impl EditSettingsBuilder {
             api_client,
             url: None,
             secret_key: None,
+            is_hidden: false,
         }
     }
 
-    pub fn url(mut self, url: impl Into<String>) -> Self {
+    pub fn set_url(mut self, url: impl Into<String>) -> Self {
         self.url = Some(url.into());
         self
     }
 
-    pub fn secret_key(mut self, secret_key: impl Into<String>) -> Self {
+    pub fn set_secret_key(mut self, secret_key: impl Into<String>) -> Self {
         self.secret_key = Some(secret_key.into());
+        self
+    }
+
+    pub fn set_is_hidden(mut self, is_hidden: bool) -> Self {
+        self.is_hidden = is_hidden;
         self
     }
 }

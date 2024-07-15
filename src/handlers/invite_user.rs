@@ -6,8 +6,6 @@ pub struct InviteUser {
 
 #[async_trait::async_trait]
 impl Handler for InviteUser {
-    const EVENT_TYPE: &'static str = "invite_user";
-
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "visible_messages_count": ctx.object.visible_messages_count.unwrap_or(0),

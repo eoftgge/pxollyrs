@@ -6,14 +6,14 @@ use crate::errors::{WebhookError, WebhookResult};
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
 use axum::body::Body;
-use axum::extract::{FromRequest};
+use axum::extract::FromRequest;
 use axum::http::Request;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
+use convert_case::{Case, Casing};
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
-use convert_case::{Case, Casing};
 
 #[async_trait::async_trait]
 pub trait Dispatch: Send + Sync + Clone {
@@ -88,7 +88,9 @@ impl<D: Dispatch> Executor<D> {
     }
 }
 
-impl<E: Dispatch + 'static, S: Send + Sync + 'static> axum::handler::Handler<(), S> for Executor<E> {
+impl<E: Dispatch + 'static, S: Send + Sync + 'static> axum::handler::Handler<(), S>
+    for Executor<E>
+{
     type Future = Pin<Box<dyn Future<Output = Response> + Send>>;
 
     fn call(self, req: Request<Body>, state: S) -> Self::Future {

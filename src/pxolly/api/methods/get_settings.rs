@@ -1,10 +1,10 @@
 use crate::pxolly::api::PxollyAPI;
 use crate::pxolly::types::responses::get_settings::GetSettingsResponse;
+use crate::pxolly::DEFAULT_VERSION_PXOLLY;
 use crate::WebhookResult;
 use serde::Serialize;
 use std::future::Future;
 use std::pin::Pin;
-use crate::pxolly::DEFAULT_VERSION_PXOLLY;
 
 #[derive(Serialize)]
 pub struct GetSettingsBuilder {
@@ -15,7 +15,10 @@ pub struct GetSettingsBuilder {
 
 impl GetSettingsBuilder {
     pub(crate) fn new(api_client: PxollyAPI) -> Self {
-        Self { api_client, v: DEFAULT_VERSION_PXOLLY }
+        Self {
+            api_client,
+            v: DEFAULT_VERSION_PXOLLY,
+        }
     }
 }
 

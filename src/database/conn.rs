@@ -22,6 +22,7 @@ impl DatabaseConn {
     pub async fn new(path: impl AsRef<Path>) -> WebhookResult<Self> {
         let mut file = OpenOptions::new()
             .create(true)
+            .truncate(true)
             .write(true)
             .read(true)
             .open(path)

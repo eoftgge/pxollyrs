@@ -1,3 +1,6 @@
-use crate::pxolly::types::responses::get_settings::GetSettingsResponse;
+use serde::Deserialize;
 
-pub type EditSettingsResponse = GetSettingsResponse;
+#[derive(Deserialize, Debug)]
+pub struct EditSettingsResponse {
+    pub state: u16,
+}

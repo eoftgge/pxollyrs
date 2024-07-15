@@ -6,8 +6,6 @@ pub struct ResetTheme {
 
 #[async_trait::async_trait]
 impl Handler for ResetTheme {
-    const EVENT_TYPE: &'static str = "reset_theme";
-
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "peer_id": ctx.peer_id().await?

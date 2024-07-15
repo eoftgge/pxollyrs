@@ -7,8 +7,6 @@ pub struct Sync {
 
 #[async_trait::async_trait]
 impl Handler for Sync {
-    const EVENT_TYPE: &'static str = "sync";
-
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let message = ctx.object.message.as_ref().expect("Expect field: message");
         let params = par! {

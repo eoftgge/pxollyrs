@@ -8,8 +8,6 @@ pub struct SetTheme {
 
 #[async_trait::async_trait]
 impl Handler for SetTheme {
-    const EVENT_TYPE: &'static str = "set_theme";
-
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = par! {
             "peer_id": ctx.peer_id().await?,

@@ -2,6 +2,7 @@ pub mod edit_settings;
 pub mod get_settings;
 
 use axum::response::{IntoResponse, Response};
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub enum PxollyResponse {
@@ -12,15 +13,16 @@ pub enum PxollyResponse {
     Locked,
 }
 
-impl ToString for PxollyResponse {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for PxollyResponse {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
             Self::Text(text) => text.into(),
             Self::ConfirmationCode(code) => code.into(),
             Self::ErrorCode(code) => code.to_string(),
             Self::Success => "1".into(),
             Self::Locked => "locked".into(),
-        }
+        };
+        write!(f, "{}", s)
     }
 }
 

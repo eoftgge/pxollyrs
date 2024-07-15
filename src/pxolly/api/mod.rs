@@ -58,7 +58,9 @@ impl PxollyAPI {
             .send()
             .await?;
 
-        match into_response(response).await? {
+        let response = into_response(response).await?;
+        log::debug!("{:?}", response);
+        match response {
             PxollyAPIResponse::Response(ok) => Ok(ok),
             PxollyAPIResponse::Error(err) => Err(WebhookError::PxollyAPI(err)),
         }

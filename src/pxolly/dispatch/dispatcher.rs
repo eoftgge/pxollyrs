@@ -1,8 +1,6 @@
 use crate::pxolly::dispatch::handler::Handler;
 use std::sync::Arc;
 
-pub static mut EVENT_TYPES_HANDLERS: Vec<&'static str> = Vec::new();
-
 pub struct Dispatcher<H: Handler, Tail: Clone> {
     pub(crate) handler: Arc<H>,
     pub(crate) tail: Tail,
@@ -45,9 +43,6 @@ where
     type Out = Dispatcher<H, <Tail as PushHandler<NewHandler>>::Out>;
 
     fn push_handler(self, handler: NewHandler) -> Self::Out {
-        unsafe {
-            EVENT_TYPES_HANDLERS.push(H::EVENT_TYPE);
-        }
         Dispatcher {
             handler: self.handler,
             tail: self.tail.push_handler(handler),

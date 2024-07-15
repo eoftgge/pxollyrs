@@ -13,6 +13,7 @@ use axum::Json;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
+use convert_case::{Case, Casing};
 
 #[async_trait::async_trait]
 pub trait Dispatch: Send + Sync + Clone {
@@ -33,7 +34,8 @@ where
     Tail: Dispatch + Send + Sync + 'static,
 {
     async fn dispatch(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        if H::EVENT_TYPE == ctx.event_type {
+        let name_handler = stringify!(H).to_case(Case::Snake);
+        if name_handler == ctx.event_type {
             return self.handler.handle(ctx).await;
         }
         self.tail.dispatch(ctx).await

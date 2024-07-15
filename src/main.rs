@@ -26,7 +26,6 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
     let GetSettingsResponse {
         confirm_code,
         secret_key,
-        enabled,
         ..
     } = pxolly_client.callback().get_settings().await?;
     let dispatcher = build_dispatcher(vk_client, http_client, confirm_code);
@@ -35,24 +34,25 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
     let listener = tokio::net::TcpListener::bind(addr).await?;
 
     log::info!("Server is starting! (addr: {}; host: {})", addr, host);
-    axum::serve(listener, app).await?;
-
     tokio::spawn(async move {
-        if !config.application().is_bind || enabled {
+        if !config.application().is_bind {
             return;
         }
 
-        match pxolly_client
+        let response = pxolly_client
             .callback()
             .edit_settings()
             .set_url(host)
             .set_secret_key(&secret_key)
-            .await
-        {
-            Ok(res) => log::info!("Bind webhook is successfully: {:?}", res),
-            Err(err) => log::error!("Bind webhook is failed: {:?}", err),
+            .await;
+
+        if let Ok(response) = response {
+            log::info!("Result bind webhook: {:?}", response)
+        } else if let Err(error) = response {
+            log::error!("Result bind webhook: {:?}", error)
         }
     });
 
+    axum::serve(listener, app).await?;
     Ok(())
 }

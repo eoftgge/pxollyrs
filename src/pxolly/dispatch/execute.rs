@@ -6,7 +6,7 @@ use crate::errors::{WebhookError, WebhookResult};
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
 use axum::body::Body;
-use axum::extract::{FromRequest, RequestParts};
+use axum::extract::{FromRequest};
 use axum::http::Request;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
@@ -86,13 +86,12 @@ impl<D: Dispatch> Executor<D> {
     }
 }
 
-impl<E: Dispatch + 'static> axum::handler::Handler<()> for Executor<E> {
+impl<E: Dispatch + 'static, S: Send + Sync + 'static> axum::handler::Handler<(), S> for Executor<E> {
     type Future = Pin<Box<dyn Future<Output = Response> + Send>>;
 
-    fn call(self, req: Request<Body>) -> Self::Future {
-        let mut parts = RequestParts::new(req);
+    fn call(self, req: Request<Body>, state: S) -> Self::Future {
         Box::pin(async move {
-            self.execute(match Json::from_request(&mut parts).await {
+            self.execute(match Json::from_request(req, &state).await {
                 Ok(event) => event,
                 Err(err) => return err.into_response(),
             })

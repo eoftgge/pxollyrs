@@ -36,7 +36,7 @@ impl EditSettingsBuilder {
 
 impl std::future::IntoFuture for EditSettingsBuilder {
     type Output = WebhookResult<EditSettingsResponse>;
-    type IntoFuture = Pin<Box<dyn Future<Output = Self::Output>>>;
+    type IntoFuture = Pin<Box<dyn Future<Output = Self::Output> + Send + Sync>>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {

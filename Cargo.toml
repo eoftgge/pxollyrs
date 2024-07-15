@@ -4,18 +4,18 @@ version = "0.6.0"
 edition = "2021"
 
 [dependencies]
-reqwest = { version = "0.11.3", features = ["json", "rustls-tls-native-roots", "multipart"], default-features = false }
-config = { version = "0.13.2", features = ["toml"] }
-tokio = { version = "1.5.0", features = ["full"] }
-serde = { version = "1.0.126", features = ["derive", "rc"] }
-serde_json = { version = "1.0.64" }
+reqwest = { version = "0.12.4", features = ["json", "rustls-tls-native-roots", "multipart"], default-features = false }
+config = { version = "0.14.0", features = ["toml"] }
+tokio = { version = "1.37.0", features = ["full"] }
+serde = { version = "1.0.202", features = ["derive", "rc"] }
+serde_json = { version = "1.0.117" }
 log = { version = "0.4.14" }
-simple_logger = "4.0.0"
-thiserror = "1.0.29"
+simple_logger = "5.0.0"
+thiserror = "1.0.61"
 public-ip = "0.2.2"
-axum = "0.5.15"
-async-trait = "0.1.57"
-rmp-serde = "1.1.1"
+axum = "0.7.5"
+async-trait = "0.1.80"
+rmp-serde = "1.3.0"
 
 [profile.release]
 strip = true  

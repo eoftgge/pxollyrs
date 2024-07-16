@@ -15,7 +15,10 @@ use std::pin::Pin;
 use std::sync::Arc;
 
 pub trait Dispatch: Send + Sync + Clone {
-    fn dispatch(&self, ctx: PxollyContext) -> impl Future<Output = WebhookResult<PxollyResponse>> + Send + Sync;
+    fn dispatch(
+        &self,
+        ctx: PxollyContext,
+    ) -> impl Future<Output = WebhookResult<PxollyResponse>> + Send + Sync;
 }
 
 impl Dispatch for DispatcherBuilder {

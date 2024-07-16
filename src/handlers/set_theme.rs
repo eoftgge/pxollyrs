@@ -8,7 +8,7 @@ pub struct SetTheme {
 
 impl Handler for SetTheme {
     const EVENT_TYPE: &'static str = "set_theme";
-    
+
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = serde_json::json!({
             "peer_id": ctx.peer_id().await?,

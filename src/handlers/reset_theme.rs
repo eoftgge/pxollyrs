@@ -6,7 +6,7 @@ pub struct ResetTheme {
 
 impl Handler for ResetTheme {
     const EVENT_TYPE: &'static str = "reset_theme";
-    
+
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = serde_json::json!({
             "peer_id": ctx.peer_id().await?,

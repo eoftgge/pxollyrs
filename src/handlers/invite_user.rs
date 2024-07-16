@@ -6,7 +6,7 @@ pub struct InviteUser {
 
 impl Handler for InviteUser {
     const EVENT_TYPE: &'static str = "invite_user";
-    
+
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let params = serde_json::json!({
             "visible_messages_count": ctx.object.visible_messages_count.unwrap_or(0),

@@ -53,9 +53,6 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
         }
     };
     let server = axum::serve(listener, app);
-    let (_, _) = tokio::join!(
-        async move { server.await.unwrap() },
-        auto_bind
-    );
+    let (_, _) = tokio::join!(async move { server.await.unwrap() }, auto_bind);
     Ok(())
 }

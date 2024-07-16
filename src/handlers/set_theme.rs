@@ -3,16 +3,17 @@ use crate::vk::responses::VKAPIError;
 use serde_json::Value;
 
 pub struct SetTheme {
-    pub(crate) vk_client: VKAPI,
+    pub(crate) vk_client: VKClient,
 }
 
-#[async_trait::async_trait]
 impl Handler for SetTheme {
+    const EVENT_TYPE: &'static str = "set_theme";
+    
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        let params = par! {
+        let params = serde_json::json!({
             "peer_id": ctx.peer_id().await?,
             "style": ctx.object.style.as_ref().expect("Expect field: style")
-        };
+        });
 
         let response = match self
             .vk_client

@@ -8,21 +8,20 @@ mod sync;
 
 pub mod prelude {
     pub use crate::errors::{WebhookError, WebhookResult};
-    pub use crate::par;
     pub use crate::pxolly::dispatch::context::PxollyContext;
     pub use crate::pxolly::dispatch::handler::Handler;
     pub use crate::pxolly::types::responses::PxollyResponse;
-    pub use crate::vk::api::VKAPI;
+    pub use crate::vk::client::VKClient;
 }
 
 use crate::pxolly::dispatch::dispatcher::{DispatcherBuilder, PushHandler};
 use crate::pxolly::dispatch::execute::Dispatch;
-use crate::vk::api::VKAPI;
+use crate::vk::client::VKClient;
 use reqwest::Client;
 use std::sync::Arc;
 
 pub fn build_dispatcher(
-    vk_client: VKAPI,
+    vk_client: VKClient,
     http_client: Arc<Client>,
     confirmation_code: String,
 ) -> impl Dispatch {

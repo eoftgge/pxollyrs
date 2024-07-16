@@ -32,9 +32,9 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
     let executor = Executor::new(dispatcher, conn, &secret_key);
     let app = Router::new().route("/", post(executor));
     let listener = tokio::net::TcpListener::bind(addr).await?;
-
     log::info!("Server is starting! (addr: {}; host: {})", addr, host);
-    tokio::spawn(async move {
+
+    let auto_bind = async move {
         if !config.application().is_bind {
             return;
         }
@@ -51,8 +51,11 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
         } else if let Err(error) = response {
             log::error!("Result bind webhook: {:?}", error)
         }
-    });
-
-    axum::serve(listener, app).await?;
+    };
+    let server = axum::serve(listener, app);
+    let (_, _) = tokio::join!(
+        async move { server.await.unwrap() },
+        auto_bind
+    );
     Ok(())
 }

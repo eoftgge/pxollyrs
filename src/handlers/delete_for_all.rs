@@ -2,13 +2,14 @@ use super::prelude::*;
 use serde_json::{Map, Value};
 
 pub struct DeleteForAll {
-    pub(crate) vk_client: VKAPI,
+    pub(crate) vk_client: VKClient,
 }
 
-#[async_trait::async_trait]
 impl Handler for DeleteForAll {
+    const EVENT_TYPE: &'static str = "delete_for_all";
+
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        let params = par! {
+        let params = serde_json::json!({
             "peer_id": ctx.peer_id().await?,
             "delete_for_all": 1,
             "cmids": ctx.object.conversation_message_ids
@@ -18,7 +19,7 @@ impl Handler for DeleteForAll {
                 .map(|x| x.to_string())
                 .collect::<Vec<_>>()
                 .join(",")
-        };
+        });
 
         let response = self
             .vk_client

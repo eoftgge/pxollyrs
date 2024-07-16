@@ -4,7 +4,6 @@ use serde::Deserialize;
 pub struct PxollyUser {
     pub id: i64,
     pub role: u16, // ???
-    pub balance: u64,
     pub name: String,
 }
 

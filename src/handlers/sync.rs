@@ -2,20 +2,21 @@ use crate::database::models::DatabaseChatModel;
 use crate::handlers::prelude::*;
 
 pub struct Sync {
-    pub(crate) vk_client: VKAPI,
+    pub(crate) vk_client: VKClient,
 }
 
-#[async_trait::async_trait]
 impl Handler for Sync {
+    const EVENT_TYPE: &'static str = "sync";
+
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let message = ctx.object.message.as_ref().expect("Expect field: message");
-        let params = par! {
+        let params = serde_json::json!({
             "code": EXECUTE_SYNC_CODE,
             "conversation_message_id": message.conversation_message_id,
             "text": message.text,
             "date": message.date,
             "from_id": message.from_id
-        };
+        });
         let chat_id = ctx.object.chat_id.as_ref().expect("Expect field: chat_id");
 
         if DatabaseChatModel::contains(chat_id, &ctx.conn()).await? {

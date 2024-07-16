@@ -1,3 +1,2 @@
-pub mod api;
-pub mod macros;
+pub mod client;
 pub mod responses;

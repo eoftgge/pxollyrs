@@ -1,18 +1,19 @@
 use super::prelude::*;
 
 pub struct InviteUser {
-    pub(crate) vk_client: VKAPI,
+    pub(crate) vk_client: VKClient,
 }
 
-#[async_trait::async_trait]
 impl Handler for InviteUser {
+    const EVENT_TYPE: &'static str = "invite_user";
+
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        let params = par! {
+        let params = serde_json::json!({
             "visible_messages_count": ctx.object.visible_messages_count.unwrap_or(0),
             "member_id": ctx.object.user_id.expect("Expect field: user_id"),
             "chat_id": ctx.peer_id().await? - 2_000_000_000,
             "code": EXECUTE_INVITE_CODE,
-        };
+        });
         let response = match self.vk_client.api_request::<i64>("execute", params).await {
             Ok(ok) => match ok {
                 -100 => PxollyResponse::ErrorCode(-1),

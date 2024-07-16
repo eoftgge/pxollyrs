@@ -6,20 +6,21 @@ use std::sync::Arc;
 use crate::handlers::prelude::*;
 
 pub struct ChatPhotoUpdate {
-    pub(crate) vk_client: VKAPI,
+    pub(crate) vk_client: VKClient,
     pub(crate) http_client: Arc<Client>,
 }
 
-#[async_trait::async_trait]
 impl Handler for ChatPhotoUpdate {
+    const EVENT_TYPE: &'static str = "chat_photo_update";
+
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let response_url = self
             .vk_client
             .api_request::<Value>(
                 "photos.getChatUploadServer",
-                par! {
+                serde_json::json!({
                     "chat_id": ctx.peer_id().await? - 2_000_000_000
-                },
+                }),
             )
             .await?;
         let photo = self
@@ -44,15 +45,14 @@ impl Handler for ChatPhotoUpdate {
             .await?;
         let body = response["response"]
             .as_str()
-            .ok_or_else(|| WebhookError::from("response isn't str...."))?
-            as &str;
+            .ok_or_else(|| WebhookError::from("response isn't str...."))?;
         let _ = self
             .vk_client
             .api_request::<Value>(
                 "messages.setChatPhoto",
-                par! {
+                serde_json::json!({
                     "file": body
-                },
+                }),
             )
             .await?;
 

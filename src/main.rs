@@ -5,7 +5,7 @@ use pxollyrs::handlers::build_dispatcher;
 use pxollyrs::pxolly::api::PxollyAPI;
 use pxollyrs::pxolly::dispatch::execute::Executor;
 use pxollyrs::pxolly::types::responses::get_settings::GetSettingsResponse;
-use pxollyrs::vk::api::VKAPI;
+use pxollyrs::vk::client::VKClient;
 use std::sync::Arc;
 
 #[tokio::main]
@@ -17,7 +17,7 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
     let conn = DatabaseConn::new(config.application().database().path()).await?;
     let http_client = Arc::new(reqwest::Client::new());
     let pxolly_client = PxollyAPI::new(http_client.clone(), config.pxolly().token());
-    let vk_client = VKAPI::new(
+    let vk_client = VKClient::new(
         http_client.clone(),
         config.vk().token(),
         config.vk().version(),
@@ -32,9 +32,9 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
     let executor = Executor::new(dispatcher, conn, &secret_key);
     let app = Router::new().route("/", post(executor));
     let listener = tokio::net::TcpListener::bind(addr).await?;
-
     log::info!("Server is starting! (addr: {}; host: {})", addr, host);
-    tokio::spawn(async move {
+
+    let auto_bind = async move {
         if !config.application().is_bind {
             return;
         }
@@ -51,8 +51,8 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
         } else if let Err(error) = response {
             log::error!("Result bind webhook: {:?}", error)
         }
-    });
-
-    axum::serve(listener, app).await?;
+    };
+    let server = axum::serve(listener, app);
+    let (_, _) = tokio::join!(async move { server.await.unwrap() }, auto_bind);
     Ok(())
 }

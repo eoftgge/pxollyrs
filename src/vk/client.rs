@@ -9,13 +9,13 @@ use std::sync::Arc;
 const API_URL: &str = "https://api.vk.com/method/";
 
 #[derive(Clone)]
-pub struct VKAPI {
+pub struct VKClient {
     access_token: Arc<str>,
     version: Arc<str>,
     client: Arc<Client>,
 }
 
-impl VKAPI {
+impl VKClient {
     pub fn new(
         client: Arc<Client>,
         access_token: impl Into<String>,

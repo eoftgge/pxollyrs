@@ -10,32 +10,30 @@ use axum::extract::FromRequest;
 use axum::http::Request;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
-use convert_case::{Case, Casing};
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 
-#[async_trait::async_trait]
 pub trait Dispatch: Send + Sync + Clone {
-    async fn dispatch(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse>;
+    fn dispatch(
+        &self,
+        ctx: PxollyContext,
+    ) -> impl Future<Output = WebhookResult<PxollyResponse>> + Send + Sync;
 }
 
-#[async_trait::async_trait]
 impl Dispatch for DispatcherBuilder {
     async fn dispatch(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
         Ok(PxollyResponse::ErrorCode(0))
     }
 }
 
-#[async_trait::async_trait]
 impl<H, Tail> Dispatch for Dispatcher<H, Tail>
 where
     H: Handler,
     Tail: Dispatch + Send + Sync + 'static,
 {
     async fn dispatch(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        let name_handler = stringify!(H).to_case(Case::Snake);
-        if name_handler == ctx.event_type {
+        if ctx.event_type == H::EVENT_TYPE {
             return self.handler.handle(ctx).await;
         }
         self.tail.dispatch(ctx).await

@@ -1,15 +1,15 @@
 use crate::pxolly::dispatch::handler::Handler;
 use std::sync::Arc;
 
-pub struct Dispatcher<H: Handler, Tail: Clone> {
-    pub(crate) handler: Arc<H>,
+pub struct Dispatcher<Current: Handler, Tail: Clone> {
+    pub(crate) current: Arc<Current>,
     pub(crate) tail: Tail,
 }
 
 impl<H: Handler, Tail: Clone> Clone for Dispatcher<H, Tail> {
     fn clone(&self) -> Self {
         Self {
-            handler: Arc::clone(&self.handler),
+            current: Arc::clone(&self.current),
             tail: self.tail.clone(),
         }
     }
@@ -18,34 +18,35 @@ impl<H: Handler, Tail: Clone> Clone for Dispatcher<H, Tail> {
 #[derive(Clone)]
 pub struct DispatcherBuilder;
 
-pub trait PushHandler<NewHandler> {
+pub trait ComposeHandler<In> {
     type Out;
-    fn push_handler(self, handler: NewHandler) -> Self::Out;
+    fn compose(self, handler: In) -> Self::Out;
 }
 
-impl<NewHandler: Handler> PushHandler<NewHandler> for DispatcherBuilder {
-    type Out = Dispatcher<NewHandler, DispatcherBuilder>;
+impl<In: Handler> ComposeHandler<In> for DispatcherBuilder {
+    type Out = Dispatcher<In, DispatcherBuilder>;
 
-    fn push_handler(self, handler: NewHandler) -> Self::Out {
+    fn compose(self, handler: In) -> Self::Out {
+        let handler = Arc::new(handler);
         Dispatcher {
-            handler: Arc::new(handler),
-            tail: DispatcherBuilder,
+            current: Arc::new(handler),
+            tail: self,
         }
     }
 }
 
-impl<H, Tail, NewHandler> PushHandler<NewHandler> for Dispatcher<H, Tail>
+impl<Current, Tail, In> ComposeHandler<In> for Dispatcher<Current, Tail>
 where
-    Tail: PushHandler<NewHandler> + Clone,
-    H: Handler,
-    <Tail as PushHandler<NewHandler>>::Out: Clone,
+    Tail: ComposeHandler<In> + Clone,
+    Current: Handler,
+    <Tail as ComposeHandler<In>>::Out: Clone,
 {
-    type Out = Dispatcher<H, <Tail as PushHandler<NewHandler>>::Out>;
+    type Out = Dispatcher<Current, Dispatcher<Current, Tail>>;
 
-    fn push_handler(self, handler: NewHandler) -> Self::Out {
+    fn compose(self, handler: In) -> Self::Out {
         Dispatcher {
-            handler: self.handler,
-            tail: self.tail.push_handler(handler),
+            current: handler,
+            tail: self.tail.compose(self.current),
         }
     }
 }

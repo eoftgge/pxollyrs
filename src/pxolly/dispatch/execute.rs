@@ -1,7 +1,7 @@
 use super::context::PxollyContext;
-use super::dispatcher::{Dispatcher, DispatcherBuilder};
+use super::dispatcher::{Dispatch, Dispatcher, DispatcherBuilder};
 use super::handler::Handler;
-use crate::database::conn::DatabaseConn;
+use crate::database::conn::DatabaseConnection;
 use crate::errors::{WebhookError, WebhookResult};
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
@@ -14,41 +14,15 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 
-pub trait Dispatch: Send + Sync + Clone {
-    fn dispatch(
-        &self,
-        ctx: PxollyContext,
-    ) -> impl Future<Output = WebhookResult<PxollyResponse>> + Send + Sync;
-}
-
-impl Dispatch for DispatcherBuilder {
-    async fn dispatch(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
-        Ok(PxollyResponse::ErrorCode(0))
-    }
-}
-
-impl<H, Tail> Dispatch for Dispatcher<H, Tail>
-where
-    H: Handler,
-    Tail: Dispatch + Send + Sync + 'static,
-{
-    async fn dispatch(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        if ctx.event_type == H::EVENT_TYPE {
-            return self.handler.handle(ctx).await;
-        }
-        self.tail.dispatch(ctx).await
-    }
-}
-
 #[derive(Clone)]
-pub struct Executor<D: Dispatch> {
-    dispatcher: Arc<D>,
+pub struct Executor<T: Dispatch + Clone> {
+    dispatcher: T,
     secret_key: String,
-    conn: DatabaseConn,
+    conn: DatabaseConnection,
 }
 
 impl<D: Dispatch> Executor<D> {
-    pub fn new(dispatcher: D, conn: DatabaseConn, secret_key: impl Into<String>) -> Self {
+    pub fn new(dispatcher: D, conn: DatabaseConnection, secret_key: impl Into<String>) -> Self {
         Self {
             dispatcher: Arc::new(dispatcher),
             secret_key: secret_key.into(),

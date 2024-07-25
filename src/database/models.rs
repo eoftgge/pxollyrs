@@ -1,4 +1,4 @@
-use crate::database::conn::DatabaseConn;
+use crate::database::conn::DatabaseConnection;
 use crate::WebhookResult;
 use serde::{Deserialize, Serialize};
 
@@ -9,11 +9,11 @@ pub struct DatabaseChatModel {
 }
 
 impl DatabaseChatModel {
-    pub async fn contains(chat_id: &str, conn: &DatabaseConn) -> WebhookResult<bool> {
+    pub async fn contains(chat_id: &str, conn: &DatabaseConnection) -> WebhookResult<bool> {
         Ok(Self::find(chat_id, conn).await?.is_some())
     }
 
-    pub async fn find(chat_id: &str, conn: &DatabaseConn) -> WebhookResult<Option<Self>> {
+    pub async fn find(chat_id: &str, conn: &DatabaseConnection) -> WebhookResult<Option<Self>> {
         let mut mutex = conn.lock().await;
         let chats: Vec<Self> = serde_json::from_slice(&mutex.read().await?)?;
         Ok(chats
@@ -22,7 +22,7 @@ impl DatabaseChatModel {
             .last())
     }
 
-    pub async fn insert(self, conn: &DatabaseConn) -> WebhookResult<()> {
+    pub async fn insert(self, conn: &DatabaseConnection) -> WebhookResult<()> {
         let mut mutex = conn.lock().await;
         let mut chats: Vec<Self> = serde_json::from_slice(&mutex.read().await?)?;
         chats.push(self);

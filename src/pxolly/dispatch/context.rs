@@ -1,4 +1,4 @@
-use crate::database::conn::DatabaseConn;
+use crate::database::conn::DatabaseConnection;
 use crate::database::models::DatabaseChatModel;
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
@@ -7,16 +7,16 @@ use crate::{WebhookError, WebhookResult};
 #[derive(Debug)]
 pub struct PxollyContext {
     event: PxollyEvent,
-    conn: DatabaseConn,
+    database: DatabaseConnection,
 }
 
 impl PxollyContext {
-    pub fn new(event: PxollyEvent, conn: DatabaseConn) -> Self {
-        Self { event, conn }
+    pub fn new(event: PxollyEvent, database: DatabaseConnection) -> Self {
+        Self { event, database }
     }
 
-    pub fn conn(&self) -> DatabaseConn {
-        self.conn.clone()
+    pub fn database(&self) -> DatabaseConnection {
+        self.database.clone()
     }
 
     pub async fn chat(&self) -> WebhookResult<Option<DatabaseChatModel>> {
@@ -25,7 +25,7 @@ impl PxollyContext {
                 .chat_id
                 .as_ref()
                 .expect("Expected field `chat_id`"),
-            &self.conn,
+            &self.database,
         )
         .await
         .map_err(|_| WebhookError::PxollyResponse(PxollyResponse::ErrorCode(3)))

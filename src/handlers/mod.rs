@@ -14,7 +14,7 @@ pub mod prelude {
     pub use crate::vk::client::VKClient;
 }
 
-use crate::pxolly::dispatch::dispatcher::{DispatcherBuilder, PushHandler};
+use crate::pxolly::dispatch::dispatcher::DispatcherBuilder;
 use crate::pxolly::dispatch::execute::Dispatch;
 use crate::vk::client::VKClient;
 use reqwest::Client;

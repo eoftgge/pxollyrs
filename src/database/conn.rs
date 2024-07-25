@@ -8,17 +8,17 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::sync::{Mutex, MutexGuard};
 
 #[derive(Clone)]
-pub struct DatabaseConn {
+pub struct DatabaseConnection {
     driver: Arc<Mutex<DatabaseDriver>>,
 }
 
-impl std::fmt::Debug for DatabaseConn {
+impl std::fmt::Debug for DatabaseConnection {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("DatabaseConn").finish()
     }
 }
 
-impl DatabaseConn {
+impl DatabaseConnection {
     pub async fn new(path: impl AsRef<Path>) -> WebhookResult<Self> {
         let mut file = OpenOptions::new()
             .create(true)

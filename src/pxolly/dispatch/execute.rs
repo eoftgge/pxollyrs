@@ -1,8 +1,7 @@
 use super::context::PxollyContext;
-use super::dispatcher::{Dispatch, Dispatcher, DispatcherBuilder};
-use super::handler::Handler;
+use super::dispatcher::Dispatch;
 use crate::database::conn::DatabaseConnection;
-use crate::errors::{WebhookError, WebhookResult};
+use crate::errors::WebhookError;
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::PxollyResponse;
 use axum::body::Body;
@@ -14,19 +13,18 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 
-#[derive(Clone)]
-pub struct Executor<T: Dispatch + Clone> {
-    dispatcher: T,
+pub struct Executor<T: Dispatch> {
+    dispatcher: Arc<T>,
     secret_key: String,
-    conn: DatabaseConnection,
+    database: DatabaseConnection,
 }
 
-impl<D: Dispatch> Executor<D> {
-    pub fn new(dispatcher: D, conn: DatabaseConnection, secret_key: impl Into<String>) -> Self {
+impl<T: Dispatch> Executor<T> {
+    pub fn new(dispatcher: T, database: DatabaseConnection, secret_key: impl Into<String>) -> Self {
         Self {
             dispatcher: Arc::new(dispatcher),
             secret_key: secret_key.into(),
-            conn,
+            database,
         }
     }
 
@@ -37,7 +35,7 @@ impl<D: Dispatch> Executor<D> {
             return PxollyResponse::Locked;
         }
 
-        let ctx = PxollyContext::new(event, self.conn.clone());
+        let ctx = PxollyContext::new(event, self.database.clone());
         let response = match self.dispatcher.dispatch(ctx).await {
             Ok(response) => response,
             Err(WebhookError::VKAPI(err)) => {
@@ -60,7 +58,17 @@ impl<D: Dispatch> Executor<D> {
     }
 }
 
-impl<E: Dispatch + 'static, S: Send + Sync + 'static> axum::handler::Handler<(), S>
+impl<T: Dispatch> Clone for Executor<T> {
+    fn clone(&self) -> Self {
+        Self {
+            dispatcher: Arc::clone(&self.dispatcher),
+            database: self.database.clone(),
+            secret_key: self.secret_key.clone()
+        }
+    }
+}
+
+impl<E: Dispatch, S: Send + Sync + 'static> axum::handler::Handler<(), S>
     for Executor<E>
 {
     type Future = Pin<Box<dyn Future<Output = Response> + Send>>;

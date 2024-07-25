@@ -19,7 +19,7 @@ impl Handler for Sync {
         });
         let chat_id = ctx.object.chat_id.as_ref().expect("Expect field: chat_id");
 
-        if DatabaseChatModel::contains(chat_id, &ctx.conn()).await? {
+        if DatabaseChatModel::contains(chat_id, &ctx.database()).await? {
             return Ok(PxollyResponse::ErrorCode(5));
         }
 
@@ -29,7 +29,7 @@ impl Handler for Sync {
             chat_uid: peer_id,
             chat_id: chat_id.into(),
         }
-        .insert(&ctx.conn())
+        .insert(&ctx.database())
         .await?;
 
         Ok(PxollyResponse::ConfirmationCode(

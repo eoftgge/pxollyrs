@@ -1,6 +1,5 @@
-use std::sync::Arc;
 use crate::handlers::prelude::Handler;
-use crate::pxolly::dispatch::dispatcher::{Dispatcher, DispatcherBuilder};
+use crate::pxolly::dispatch::dispatcher::{Dispatch, Dispatcher, DispatcherBuilder};
 
 pub trait ComposeHandler<In> {
     type Out;
@@ -11,7 +10,6 @@ impl<In: Handler> ComposeHandler<In> for DispatcherBuilder {
     type Out = Dispatcher<In, DispatcherBuilder>;
 
     fn compose(self, handler: In) -> Self::Out {
-        let handler = Arc::new(handler);
         Dispatcher {
             current: handler,
             tail: self,
@@ -21,11 +19,11 @@ impl<In: Handler> ComposeHandler<In> for DispatcherBuilder {
 
 impl<Current, Tail, In> ComposeHandler<In> for Dispatcher<Current, Tail>
 where
-    Tail: ComposeHandler<In> + Clone,
+    Tail: ComposeHandler<Current, Out = Dispatcher<Current, Tail>> + Dispatch,
     Current: Handler,
-    <Tail as ComposeHandler<In>>::Out: Clone,
+    In: Handler,
 {
-    type Out = Dispatcher<Current, Dispatcher<Current, Tail>>;
+    type Out = Dispatcher<In, Dispatcher<Current, Tail>>;
 
     fn compose(self, handler: In) -> Self::Out {
         Dispatcher {

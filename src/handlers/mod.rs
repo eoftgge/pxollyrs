@@ -14,11 +14,11 @@ pub mod prelude {
     pub use crate::vk::client::VKClient;
 }
 
-use crate::pxolly::dispatch::dispatcher::DispatcherBuilder;
-use crate::pxolly::dispatch::execute::Dispatch;
+use crate::pxolly::dispatch::dispatcher::{Dispatch, DispatcherBuilder};
 use crate::vk::client::VKClient;
 use reqwest::Client;
 use std::sync::Arc;
+use crate::pxolly::dispatch::compose::ComposeHandler;
 
 pub fn build_dispatcher(
     vk_client: VKClient,
@@ -26,22 +26,22 @@ pub fn build_dispatcher(
     confirmation_code: String,
 ) -> impl Dispatch {
     DispatcherBuilder
-        .push_handler(chat_photo_update::ChatPhotoUpdate {
+        .compose(chat_photo_update::ChatPhotoUpdate {
             vk_client: vk_client.clone(),
             http_client,
         })
-        .push_handler(delete_for_all::DeleteForAll {
+        .compose(delete_for_all::DeleteForAll {
             vk_client: vk_client.clone(),
         })
-        .push_handler(invite_user::InviteUser {
+        .compose(invite_user::InviteUser {
             vk_client: vk_client.clone(),
         })
-        .push_handler(reset_theme::ResetTheme {
+        .compose(reset_theme::ResetTheme {
             vk_client: vk_client.clone(),
         })
-        .push_handler(set_theme::SetTheme {
+        .compose(set_theme::SetTheme {
             vk_client: vk_client.clone(),
         })
-        .push_handler(sync::Sync { vk_client })
-        .push_handler(confirmation::Confirmation { confirmation_code })
+        .compose(sync::Sync { vk_client })
+        .compose(confirmation::Confirmation { confirmation_code })
 }

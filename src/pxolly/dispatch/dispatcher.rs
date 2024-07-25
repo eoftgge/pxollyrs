@@ -1,10 +1,9 @@
 use std::future::Future;
 use crate::pxolly::dispatch::handler::Handler;
-use std::sync::Arc;
 use crate::handlers::prelude::{PxollyContext, PxollyResponse};
 use crate::WebhookResult;
 
-pub trait Dispatch {
+pub trait Dispatch: Send + Sync + 'static {
     fn dispatch(
         &self,
         ctx: PxollyContext,
@@ -14,16 +13,25 @@ pub trait Dispatch {
 #[derive(Clone)]
 pub struct DispatcherBuilder;
 
-#[derive(Clone)]
-pub struct Dispatcher<Current: Handler, Tail: Clone> {
-    pub(crate) current: Arc<Current>,
+pub struct Dispatcher<Current, Tail>
+where
+    Current: Handler,
+    Tail: Dispatch,
+{
+    pub(crate) current: Current,
     pub(crate) tail: Tail,
+}
+
+impl Dispatch for DispatcherBuilder {
+    async fn dispatch(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
+        Ok(PxollyResponse::Locked) // TODO: implement not found handler
+    }
 }
 
 impl<Current, Tail> Dispatch for Dispatcher<Current, Tail>
 where
-    Current: Handler,
-    Tail: Dispatch,
+    Current: Handler + Send + Sync,
+    Tail: Dispatch + Send + Sync,
 {
     async fn dispatch(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
         let event_type = Current::EVENT_TYPE;

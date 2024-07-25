@@ -3,7 +3,7 @@ use crate::pxolly::types::responses::PxollyResponse;
 use crate::WebhookResult;
 use std::future::Future;
 
-pub trait Handler {
+pub trait Handler: Send + Sync + 'static {
     const EVENT_TYPE: &'static str;
 
     fn handle(

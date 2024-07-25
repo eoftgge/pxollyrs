@@ -1,7 +1,7 @@
-use std::future::Future;
-use crate::pxolly::dispatch::handler::Handler;
 use crate::handlers::prelude::{PxollyContext, PxollyResponse};
+use crate::pxolly::dispatch::handler::Handler;
 use crate::WebhookResult;
+use std::future::Future;
 
 pub trait Dispatch: Send + Sync + 'static {
     fn dispatch(

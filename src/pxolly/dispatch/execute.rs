@@ -63,14 +63,12 @@ impl<T: Dispatch> Clone for Executor<T> {
         Self {
             dispatcher: Arc::clone(&self.dispatcher),
             database: self.database.clone(),
-            secret_key: self.secret_key.clone()
+            secret_key: self.secret_key.clone(),
         }
     }
 }
 
-impl<E: Dispatch, S: Send + Sync + 'static> axum::handler::Handler<(), S>
-    for Executor<E>
-{
+impl<E: Dispatch, S: Send + Sync + 'static> axum::handler::Handler<(), S> for Executor<E> {
     type Future = Pin<Box<dyn Future<Output = Response> + Send>>;
 
     fn call(self, req: Request<Body>, state: S) -> Self::Future {

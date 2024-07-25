@@ -14,11 +14,11 @@ pub mod prelude {
     pub use crate::vk::client::VKClient;
 }
 
+use crate::pxolly::dispatch::compose::ComposeHandler;
 use crate::pxolly::dispatch::dispatcher::{Dispatch, DispatcherBuilder};
 use crate::vk::client::VKClient;
 use reqwest::Client;
 use std::sync::Arc;
-use crate::pxolly::dispatch::compose::ComposeHandler;
 
 pub fn build_dispatcher(
     vk_client: VKClient,

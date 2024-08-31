@@ -54,7 +54,7 @@ impl PxollyAPI {
             url,
             response
         );
-        
+
         let response = into_response(response).await?;
         match response {
             PxollyAPIResponse::Response(ok) => Ok(ok),

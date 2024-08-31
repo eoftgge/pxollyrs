@@ -1,5 +1,5 @@
-use std::fmt::Debug;
 use serde::Serialize;
+use std::fmt::Debug;
 
 #[derive(Serialize, Debug)]
 pub struct PxollyAPIRequestParams<'a, T: Serialize + Debug> {

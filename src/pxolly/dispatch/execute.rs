@@ -57,6 +57,7 @@ impl<E: Dispatch, S: Send + Sync + 'static> axum::handler::Handler<(), S> for Ex
 
     fn call(self, req: Request<Body>, state: S) -> Self::Future {
         Box::pin(async move {
+            log::debug!("The raw request: {:?}", req);
             let event = match Json::from_request(req, &state).await {
                 Ok(event) => event,
                 Err(err) => return err.into_response(),

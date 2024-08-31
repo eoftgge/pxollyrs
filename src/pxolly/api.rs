@@ -40,22 +40,22 @@ impl PxollyAPI {
     pub async fn api_request<T: DeserializeOwned + Debug>(
         &self,
         method: impl Into<String>,
-        params: impl Serialize,
+        params: impl Serialize + Debug,
     ) -> Result<T, PxollyError> {
         let url = format!("{}{}", DEFAULT_API_URL_PXOLLY, method.into());
         let params = PxollyAPIRequestParams {
             access_token: &self.access_token,
             format: "msgpack",
-            extras: serde_json::to_value(params)?,
+            extras: params,
         };
         let response = self.client.post(&url).form(&params).send().await?;
-        let response = into_response(response).await?;
-
         log::debug!(
             "Got a response from @pxolly, content({}): {:?}",
             url,
             response
         );
+        
+        let response = into_response(response).await?;
         match response {
             PxollyAPIResponse::Response(ok) => Ok(ok),
             PxollyAPIResponse::Error(err) => Err(PxollyError::API(err)),

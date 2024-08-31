@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct EditSettingsParams {
     pub url: Option<String>,
     pub secret_key: Option<String>,

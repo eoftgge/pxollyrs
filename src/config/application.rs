@@ -68,7 +68,7 @@ pub struct LoggerConfig {
 impl LoggerConfig {
     pub fn level(&self) -> Level {
         Level::from_str(self.level.as_ref().unwrap_or(&String::from("info"))).unwrap_or_else(|_| {
-            eprintln!("WARNING: incorrect level log, default level: INFO");
+            log::warn!("WARNING: incorrect level log, default level: INFO");
             Level::Info
         })
     }

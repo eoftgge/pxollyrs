@@ -8,7 +8,7 @@ use std::sync::Arc;
 use crate::pxolly::DEFAULT_API_URL_PXOLLY;
 use crate::pxolly::errors::PxollyError;
 use crate::pxolly::types::requests::PxollyAPIRequestParams;
-use crate::pxolly::types::responses::PxollyAPIResponse;
+use crate::pxolly::types::responses::api::PxollyAPIResponse;
 
 async fn into_response<T: DeserializeOwned + Debug>(
     response: Response,

@@ -1,3 +1,6 @@
-mod execute;
-mod messages;
-mod photos;
+pub mod messages;
+pub mod photos;
+
+pub struct Categories {
+    
+}

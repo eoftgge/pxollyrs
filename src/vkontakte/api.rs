@@ -8,13 +8,13 @@ use crate::vkontakte::errors::VKontakteError;
 use crate::vkontakte::types::responses::{VKontakteAPIRequestParams, VKontakteAPIResponse};
 
 #[derive(Clone)]
-pub struct VKClient {
+pub struct VKontakteAPI {
     access_token: Arc<str>,
     version: Arc<str>,
     client: Arc<Client>,
 }
 
-impl VKClient {
+impl VKontakteAPI {
     pub fn new(
         client: Arc<Client>,
         access_token: impl Into<String>,

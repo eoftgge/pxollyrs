@@ -1,6 +1,5 @@
 use std::future::Future;
 use crate::pxolly::dispatch::handler::Handler;
-use crate::database::conn::DatabaseConnection;
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
@@ -9,7 +8,6 @@ pub trait Dispatch: Send + Sync + 'static {
     fn dispatch(
         &self,
         event: PxollyEvent,
-        database: DatabaseConnection,
     ) -> impl Future<Output = Result<PxollyWebhookResponse, PxollyWebhookError>> + Send + Sync;
 }
 
@@ -26,7 +24,7 @@ where
 }
 
 impl Dispatch for DispatcherBuilder {
-    async fn dispatch(&self, _: PxollyEvent, _: DatabaseConnection) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+    async fn dispatch(&self, _: PxollyEvent) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         Err(PxollyWebhookError {
             error_type: PxollyErrorType::UnknownEvent,
             message: None,
@@ -39,11 +37,11 @@ where
     Current: Handler + Send + Sync,
     Tail: Dispatch + Send + Sync,
 {
-    async fn dispatch(&self, event: PxollyEvent, database: DatabaseConnection) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+    async fn dispatch(&self, event: PxollyEvent) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         let event_type = Current::EVENT_TYPE;
         if event.event_type == event_type {
-            return self.current.handle(event, database).await;
+            return self.current.handle(event).await;
         }
-        self.tail.dispatch(event, database).await
+        self.tail.dispatch(event).await
     }
 }

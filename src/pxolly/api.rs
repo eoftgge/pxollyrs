@@ -1,4 +1,3 @@
-use crate::errors::WebhookError;
 use reqwest::header::HeaderValue;
 use reqwest::{Client, Response};
 use serde::de::DeserializeOwned;
@@ -52,7 +51,7 @@ impl PxollyAPI {
         let response = self
             .client
             .post(&url)
-            .form(&self.create_params(params)?)
+            .form(&params)
             .send()
             .await?;
         let response = into_response(response).await?;

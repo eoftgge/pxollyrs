@@ -1,44 +1,29 @@
-
-use crate::handlers::prelude::*;
+use crate::pxolly::dispatch::handler::Handler;
+use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::responses::errors::PxollyWebhookError;
+use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
+use crate::vkontakte::api::VKontakteAPI;
+use crate::vkontakte::types::categories::Categories;
+use crate::vkontakte::types::params::execute::ExecuteParams;
 
 pub struct Sync {
-    pub(crate) vk_client: VKClient,
+    pub(crate) vkontakte: VKontakteAPI,
 }
 
 impl Handler for Sync {
     const EVENT_TYPE: &'static str = "sync";
 
-    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        let message = ctx.object.message.as_ref().expect("Expect field: messages");
+    async fn handle(&self, event: PxollyEvent) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+        let message = event.object.message.as_ref().expect("Expect field: messages");
         let params = serde_json::json!({
-            "code": EXECUTE_SYNC_CODE,
             "conversation_message_id": message.conversation_message_id,
             "text": message.text,
             "date": message.date,
             "from_id": message.from_id
         });
-        let chat_id = ctx.object.chat_id.as_ref().expect("Expect field: chat_id");
+        let peer_id = self.vkontakte.execute::<i64>( ExecuteParams { code: EXECUTE_SYNC_CODE.into(), extras: params }).await?;
 
-        if DatabaseChatModel::contains(chat_id, &ctx.database()).await? {
-            return Ok(PxollyResponse::ErrorCode(5));
-        }
-
-        let peer_id = self.vk_client.api_request::<i64>("execute", params).await?;
-
-        DatabaseChatModel {
-            chat_uid: peer_id,
-            chat_id: chat_id.into(),
-        }
-        .insert(&ctx.database())
-        .await?;
-
-        Ok(PxollyResponse::ConfirmationCode(
-            ctx.object
-                .success
-                .as_ref()
-                .expect("Expect field: success")
-                .into(),
-        ))
+        Ok(PxollyWebhookResponse::new(true).local_id(peer_id as u64))
     }
 }
 

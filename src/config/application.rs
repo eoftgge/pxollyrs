@@ -37,25 +37,25 @@ pub struct ServerConfig {
 }
 
 impl ServerConfig {
-    pub async fn addr_and_host(&self) -> WebhookResult<(SocketAddr, Url)> {
+    pub async fn addr_and_host(&self) -> (SocketAddr, Url) {
         let result_host: Url;
         let result_addr: SocketAddr;
         let port = self.port;
 
         if let Some(host) = self.host.as_ref() {
             result_addr = SocketAddr::new(self.ip.unwrap_or(IpAddr::V4(Ipv4Addr::LOCALHOST)), port);
-            result_host = Url::from_str(host).expect("`config.host` is invalid");
+            result_host = Url::from_str(host).expect("Parsing host is invalid");
         } else if let Some(ip) = self.ip {
             result_addr = SocketAddr::new(ip, port);
-            result_host = Url::from_str(&format!("https://{}:{}", ip, port)).unwrap();
+            result_host = Url::from_str(&format!("https://{}:{}", ip, port)).expect("Parsing ip host is invalid");
         } else if let Some(ip) = public_ip::addr().await {
             result_addr = SocketAddr::new(ip, port);
-            result_host = Url::from_str(&format!("https://{}:{}", ip, port)).unwrap();
+            result_host = Url::from_str(&format!("https://{}:{}", ip, port)).expect("Parsing public host is invalid");
         } else {
             panic!("Your internet hasn't public IP...")
         }
 
-        Ok((result_addr, result_host))
+        (result_addr, result_host)
     }
 }
 

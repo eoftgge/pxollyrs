@@ -1,5 +1,6 @@
-use crate::handlers::prelude::Handler;
+
 use crate::pxolly::dispatch::dispatcher::{Dispatch, Dispatcher, DispatcherBuilder};
+use crate::pxolly::dispatch::handler::Handler;
 
 pub trait ComposeHandler<In> {
     type Out;

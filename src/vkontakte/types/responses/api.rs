@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -16,10 +17,10 @@ pub struct VKontakteAPIError {
 }
 
 #[derive(Serialize, Debug)]
-pub struct VKontakteAPIRequestParams<'a> {
+pub struct VKontakteAPIRequestParams<'a, T: Serialize + Debug> {
     pub access_token: &'a str,
     #[serde(rename = "v")]
     pub version: &'a str,
     #[serde(flatten)]
-    pub extras: Value,
+    pub extras: T,
 }

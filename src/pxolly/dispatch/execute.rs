@@ -1,5 +1,4 @@
 use crate::pxolly::types::events::PxollyEvent;
-use crate::pxolly::types::responses::errors;
 use axum::body::Body;
 use axum::extract::FromRequest;
 use axum::http::Request;
@@ -36,7 +35,7 @@ impl<T: Dispatch> Executor<T> {
         }
 
         let response = self.dispatcher.dispatch(event).await?;
-        log::debug!("response to the server: {}", response.to_string());
+        log::debug!("response to the server: {:?}", response);
         Ok(response)
     }
 }

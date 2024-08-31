@@ -1,7 +1,7 @@
 use axum::Json;
 use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
-use crate::vkontakte::types::responses::VKontakteAPIError;
+use crate::vkontakte::errors::VKontakteError;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PxollyWebhookError {
@@ -36,8 +36,17 @@ impl PxollyWebhookError {
     }
 }
 
-impl From<VKontakteAPIError> for PxollyWebhookError {
-    fn from(_: VKontakteAPIError) -> Self {
+impl From<reqwest::Error> for PxollyWebhookError {
+    fn from(_: reqwest::Error) -> Self {
+        Self {
+            message: Some("Error in HTTP".into()),
+            error_type: PxollyErrorType::InternalServerError,
+        }
+    }
+}
+
+impl From<VKontakteError> for PxollyWebhookError {
+    fn from(_: VKontakteError) -> Self {
         // TODO: also realise for limits reached and another
         Self {
             message: None,

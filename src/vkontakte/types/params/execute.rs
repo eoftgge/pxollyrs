@@ -3,7 +3,7 @@ use serde_json::Value;
 
 #[derive(Debug, Serialize)]
 pub struct ExecuteParams {
-    code: String,
+    pub(crate) code: String,
     #[serde(flatten)]
-    extras: Value,
+    pub(crate) extras: Value,
 }

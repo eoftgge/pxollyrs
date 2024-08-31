@@ -6,42 +6,33 @@ mod reset_theme;
 mod set_theme;
 mod sync;
 
-pub mod prelude {
-    pub use crate::errors::{WebhookError, WebhookResult};
-    pub use crate::pxolly::dispatch::context::PxollyContext;
-    pub use crate::pxolly::dispatch::handler::Handler;
-    pub use crate::pxolly::types::responses::PxollyResponse;
-    pub use crate::vkontakte::client::VKClient;
-}
-
 use crate::pxolly::dispatch::compose::ComposeHandler;
 use crate::pxolly::dispatch::dispatcher::{Dispatch, DispatcherBuilder};
-use crate::vkontakte::client::VKClient;
 use reqwest::Client;
-use std::sync::Arc;
+use crate::vkontakte::api::VKontakteAPI;
 
 pub fn build_dispatcher(
-    vk_client: VKClient,
-    http_client: Arc<Client>,
+    vkontakte: VKontakteAPI,
+    http: Client,
     confirmation_code: String,
 ) -> impl Dispatch {
     DispatcherBuilder
         .compose(chat_photo_update::ChatPhotoUpdate {
-            vk_client: vk_client.clone(),
-            http_client,
+            vkontakte: vkontakte.clone(),
+            http,
         })
         .compose(delete_for_all::DeleteForAll {
-            vk_client: vk_client.clone(),
+            vkontakte: vkontakte.clone(),
         })
         .compose(invite_user::InviteUser {
-            vk_client: vk_client.clone(),
+            vkontakte: vkontakte.clone(),
         })
         .compose(reset_theme::ResetTheme {
-            vk_client: vk_client.clone(),
+            vkontakte: vkontakte.clone(),
         })
         .compose(set_theme::SetTheme {
-            vk_client: vk_client.clone(),
+            vkontakte: vkontakte.clone(),
         })
-        .compose(sync::Sync { vk_client })
+        .compose(sync::Sync { vkontakte })
         .compose(confirmation::Confirmation { confirmation_code })
 }

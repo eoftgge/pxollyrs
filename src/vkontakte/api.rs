@@ -30,18 +30,18 @@ impl VKontakteAPI {
     pub async fn api_request<T: DeserializeOwned + Debug>(
         &self,
         method: impl Into<String>,
-        params: impl Serialize,
+        params: impl Serialize + Debug,
     ) -> Result<T, VKontakteError> {
         let url = format!("{}{}", DEFAULT_API_URL_VKONTAKTE, method.into());
         let params = VKontakteAPIRequestParams {
             access_token: &self.access_token,
             version: &self.version,
-            extras: serde_json::to_value(params)?
+            extras: params,
         };
         let response = self
             .client
             .post(url)
-            .form(&self.create_params(params)?)
+            .form(&params)
             .send()
             .await?
             .json::<VKontakteAPIResponse<T>>()

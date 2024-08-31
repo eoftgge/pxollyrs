@@ -1,26 +1,18 @@
-pub mod categories;
-pub mod methods;
-pub mod responses;
-
 use crate::errors::WebhookError;
-use crate::pxolly::api::responses::{PxollyAPIRequestParams, PxollyAPIResponse};
-use crate::WebhookResult;
 use reqwest::header::HeaderValue;
 use reqwest::{Client, Response};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::Debug;
 use std::sync::Arc;
+use crate::pxolly::DEFAULT_API_URL_PXOLLY;
+use crate::pxolly::errors::PxollyError;
+use crate::pxolly::types::requests::PxollyAPIRequestParams;
+use crate::pxolly::types::responses::PxollyAPIResponse;
 
-const API_URL: &str = "https://api.pxolly.com/m/";
-
-pub fn create_url(method_name: String) -> String {
-    format!("{}{}", API_URL, method_name)
-}
-
-pub async fn into_response<T: DeserializeOwned + Debug>(
+async fn into_response<T: DeserializeOwned + Debug>(
     response: Response,
-) -> WebhookResult<PxollyAPIResponse<T>> {
+) -> Result<PxollyAPIResponse<T>, PxollyError> {
     let content_type = response.headers().get("Content-Type");
 
     if content_type.eq(&Some(&HeaderValue::from_static("application/x-msgpack"))) {
@@ -50,27 +42,25 @@ impl PxollyAPI {
         &self,
         method: impl Into<String>,
         params: impl Serialize,
-    ) -> WebhookResult<T> {
-        let response = self
-            .client
-            .post(create_url(method.into()))
-            .form(&self.create_params(params)?)
-            .send()
-            .await?;
-
-        let response = into_response(response).await?;
-        log::debug!("{:?}", response);
-        match response {
-            PxollyAPIResponse::Response(ok) => Ok(ok),
-            PxollyAPIResponse::Error(err) => Err(WebhookError::PxollyAPI(err)),
-        }
-    }
-
-    fn create_params(&self, params: impl Serialize) -> WebhookResult<PxollyAPIRequestParams> {
-        Ok(PxollyAPIRequestParams {
+    ) -> Result<PxollyAPIResponse<T>, PxollyError> {
+        let url = format!("{}{}", DEFAULT_API_URL_PXOLLY, method.into());
+        let params = PxollyAPIRequestParams {
             access_token: &self.access_token,
             format: "msgpack",
             others: serde_json::to_value(params)?,
-        })
+        };
+        let response = self
+            .client
+            .post(&url)
+            .form(&self.create_params(params)?)
+            .send()
+            .await?;
+        let response = into_response(response).await?;
+        
+        log::debug!("Got a response from @pxolly, content({}): {:?}", url, response);
+        match response {
+            PxollyAPIResponse::Response(ok) => Ok(ok),
+            PxollyAPIResponse::Error(err) => Err(PxollyError::API(err)),
+        }
     }
 }

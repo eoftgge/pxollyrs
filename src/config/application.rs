@@ -2,7 +2,6 @@ use log::Level;
 use reqwest::Url;
 use serde::Deserialize;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use std::path::PathBuf;
 use std::str::FromStr;
 
 #[derive(Deserialize, Default)]

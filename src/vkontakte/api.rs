@@ -11,12 +11,12 @@ use crate::vkontakte::types::responses::{VKontakteAPIRequestParams, VKontakteAPI
 pub struct VKontakteAPI {
     access_token: Arc<str>,
     version: Arc<str>,
-    client: Arc<Client>,
+    client: Client,
 }
 
 impl VKontakteAPI {
     pub fn new(
-        client: Arc<Client>,
+        client: Client,
         access_token: impl Into<String>,
         version: impl Into<String>,
     ) -> Self {

@@ -1,9 +1,9 @@
 use crate::pxolly::api::PxollyAPI;
-use crate::pxolly::types::responses::edit_settings::EditSettingsResponse;
 use crate::WebhookResult;
 use serde::Serialize;
 use std::future::Future;
 use std::pin::Pin;
+use crate::pxolly::types::responses::EditSettingsResponse;
 
 #[derive(Serialize)]
 pub struct EditSettingsBuilder {

@@ -13,12 +13,17 @@ pub struct DeleteForAll {
 impl Handler for DeleteForAll {
     const EVENT_TYPE: &'static str = "delete_for_all";
 
-    async fn handle(&self, event: PxollyEvent) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+    async fn handle(
+        &self,
+        event: PxollyEvent,
+    ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         let params = MessagesDeleteParams {
             peer_id: (event.object.chat_local_id.unwrap() + 2_000_000_000) as i64,
             delete_for_all: 1,
-            cmids: event.object.conversation_message_ids
-                .expect("Expect field: cmids")
+            cmids: event
+                .object
+                .conversation_message_ids
+                .expect("Expect field: cmids"),
         };
         let response = self.vkontakte.messages().delete(params).await?;
 

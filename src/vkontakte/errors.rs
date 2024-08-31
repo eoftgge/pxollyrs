@@ -1,5 +1,5 @@
-use thiserror::Error;
 use crate::vkontakte::types::responses::api::VKontakteAPIError;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum VKontakteError {

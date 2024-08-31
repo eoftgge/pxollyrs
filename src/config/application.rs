@@ -47,10 +47,12 @@ impl ServerConfig {
             result_host = Url::from_str(host).expect("Parsing host is invalid");
         } else if let Some(ip) = self.ip {
             result_addr = SocketAddr::new(ip, port);
-            result_host = Url::from_str(&format!("https://{}:{}", ip, port)).expect("Parsing ip host is invalid");
+            result_host = Url::from_str(&format!("https://{}:{}", ip, port))
+                .expect("Parsing ip host is invalid");
         } else if let Some(ip) = public_ip::addr().await {
             result_addr = SocketAddr::new(ip, port);
-            result_host = Url::from_str(&format!("https://{}:{}", ip, port)).expect("Parsing public host is invalid");
+            result_host = Url::from_str(&format!("https://{}:{}", ip, port))
+                .expect("Parsing public host is invalid");
         } else {
             panic!("Your internet hasn't public IP...")
         }

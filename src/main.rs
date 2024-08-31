@@ -2,11 +2,11 @@ use axum::{routing::post, Router};
 use pxollyrs::config::WebhookConfig;
 use pxollyrs::handlers::build_dispatcher;
 use pxollyrs::pxolly::api::PxollyAPI;
-use pxollyrs::pxolly::DEFAULT_VERSION_PXOLLY;
 use pxollyrs::pxolly::dispatch::execute::Executor;
 use pxollyrs::pxolly::types::categories::Categories;
 use pxollyrs::pxolly::types::params::{EditSettingsParams, GetSettingsParams};
 use pxollyrs::pxolly::types::responses::callback::GetSettingsResponse;
+use pxollyrs::pxolly::DEFAULT_VERSION_PXOLLY;
 use pxollyrs::vkontakte::api::VKontakteAPI;
 
 #[tokio::main]
@@ -27,7 +27,12 @@ async fn main() -> Result<(), pxollyrs::errors::WebhookError> {
         confirm_code,
         secret_key,
         ..
-    } = pxolly_client.callback().get_settings(GetSettingsParams { v: DEFAULT_VERSION_PXOLLY }).await?;
+    } = pxolly_client
+        .callback()
+        .get_settings(GetSettingsParams {
+            v: DEFAULT_VERSION_PXOLLY,
+        })
+        .await?;
     let dispatcher = build_dispatcher(vk_client, http_client, confirm_code);
     let executor = Executor::new(dispatcher, &secret_key);
     let app = Router::new().route("/", post(executor));
@@ -41,7 +46,11 @@ async fn main() -> Result<(), pxollyrs::errors::WebhookError> {
 
         let response = pxolly_client
             .callback()
-            .edit_settings(EditSettingsParams { secret_key: Some(secret_key), url: Some(host.into()), is_hidden: false })
+            .edit_settings(EditSettingsParams {
+                secret_key: Some(secret_key),
+                url: Some(host.into()),
+                is_hidden: false,
+            })
             .await;
 
         if let Ok(response) = response {

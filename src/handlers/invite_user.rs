@@ -13,13 +13,23 @@ pub struct InviteUser {
 impl Handler for InviteUser {
     const EVENT_TYPE: &'static str = "invite_user";
 
-    async fn handle(&self, event: PxollyEvent) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+    async fn handle(
+        &self,
+        event: PxollyEvent,
+    ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         let params = serde_json::json!({
             "visible_messages_count": event.object.visible_messages_count.unwrap_or(0),
             "member_id": event.object.user_id.expect("Expect field: user_id"),
             "chat_id": event.object.chat_local_id.unwrap() - 2_000_000_000,
         });
-        match self.vkontakte.execute::<i64>(ExecuteParams { code: EXECUTE_INVITE_CODE.into(), extras: params }).await? {
+        match self
+            .vkontakte
+            .execute::<i64>(ExecuteParams {
+                code: EXECUTE_INVITE_CODE.into(),
+                extras: params,
+            })
+            .await?
+        {
             -100 => Err(PxollyWebhookError {
                 message: None,
                 error_type: PxollyErrorType::NotInFriends,

@@ -1,5 +1,5 @@
 pub mod api;
-pub mod photos;
 pub mod messages;
+pub mod photos;
 
-pub use api::{VKontakteAPIResponse, VKontakteAPIRequestParams, VKontakteAPIError};
+pub use api::{VKontakteAPIError, VKontakteAPIRequestParams, VKontakteAPIResponse};

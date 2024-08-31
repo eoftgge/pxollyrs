@@ -1,6 +1,6 @@
-use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::fmt::Debug;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]

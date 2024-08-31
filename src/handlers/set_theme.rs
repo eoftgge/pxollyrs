@@ -15,23 +15,31 @@ pub struct SetTheme {
 impl Handler for SetTheme {
     const EVENT_TYPE: &'static str = "set_theme";
 
-    async fn handle(&self, event: PxollyEvent) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+    async fn handle(
+        &self,
+        event: PxollyEvent,
+    ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         let params = SetConversationStyleParams {
             peer_id: (event.object.chat_local_id.unwrap() + 2_000_000_000) as i64,
             style: event.object.style.unwrap(),
         };
-        match self.vkontakte.messages().set_conversation_style(params).await
+        match self
+            .vkontakte
+            .messages()
+            .set_conversation_style(params)
+            .await
         {
             Ok(_) => Ok(PxollyWebhookResponse::new(true)),
-            Err(VKontakteError::API(VKontakteAPIError { error_code: 966, .. })) =>
-                Err(PxollyWebhookError {
-                    message: None,
-                    error_type: PxollyErrorType::BotAccessDenied,
-                }),
+            Err(VKontakteError::API(VKontakteAPIError {
+                error_code: 966, ..
+            })) => Err(PxollyWebhookError {
+                message: None,
+                error_type: PxollyErrorType::BotAccessDenied,
+            }),
             _ => Err(PxollyWebhookError {
                 message: None,
                 error_type: PxollyErrorType::VKontakteAPIError,
-            })
+            }),
         }
     }
 }

@@ -1,6 +1,6 @@
-use serde::Deserialize;
 use crate::pxolly::types::events::message::PxollyMessage;
 use crate::pxolly::types::events::user::PxollyUser;
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct PxollyObject {

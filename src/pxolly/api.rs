@@ -1,13 +1,13 @@
+use crate::pxolly::errors::PxollyError;
+use crate::pxolly::types::requests::PxollyAPIRequestParams;
+use crate::pxolly::types::responses::api::PxollyAPIResponse;
+use crate::pxolly::DEFAULT_API_URL_PXOLLY;
 use reqwest::header::HeaderValue;
 use reqwest::{Client, Response};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::Debug;
 use std::sync::Arc;
-use crate::pxolly::DEFAULT_API_URL_PXOLLY;
-use crate::pxolly::errors::PxollyError;
-use crate::pxolly::types::requests::PxollyAPIRequestParams;
-use crate::pxolly::types::responses::api::PxollyAPIResponse;
 
 async fn into_response<T: DeserializeOwned + Debug>(
     response: Response,
@@ -48,15 +48,14 @@ impl PxollyAPI {
             format: "msgpack",
             extras: serde_json::to_value(params)?,
         };
-        let response = self
-            .client
-            .post(&url)
-            .form(&params)
-            .send()
-            .await?;
+        let response = self.client.post(&url).form(&params).send().await?;
         let response = into_response(response).await?;
-        
-        log::debug!("Got a response from @pxolly, content({}): {:?}", url, response);
+
+        log::debug!(
+            "Got a response from @pxolly, content({}): {:?}",
+            url,
+            response
+        );
         match response {
             PxollyAPIResponse::Response(ok) => Ok(ok),
             PxollyAPIResponse::Error(err) => Err(PxollyError::API(err)),

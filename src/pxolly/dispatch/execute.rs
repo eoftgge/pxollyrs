@@ -1,4 +1,7 @@
+use crate::pxolly::dispatch::dispatcher::Dispatch;
 use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
+use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use axum::body::Body;
 use axum::extract::FromRequest;
 use axum::http::Request;
@@ -7,9 +10,6 @@ use axum::Json;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
-use crate::pxolly::dispatch::dispatcher::Dispatch;
-use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
-use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 
 pub struct Executor<T: Dispatch> {
     dispatcher: Arc<T>,
@@ -24,7 +24,10 @@ impl<T: Dispatch> Executor<T> {
         }
     }
 
-    async fn execute(&self, Json(event): Json<PxollyEvent>) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+    async fn execute(
+        &self,
+        Json(event): Json<PxollyEvent>,
+    ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         log::debug!("received the event: {:?}", event);
 
         if event.secret_key != self.secret_key {

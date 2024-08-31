@@ -10,29 +10,45 @@ use crate::vkontakte::types::responses::messages::set_chat_photo::SetChatPhotoRe
 use crate::vkontakte::types::responses::messages::set_conversation_style::SetConversationStyleResponse;
 
 pub struct MessagesMethods {
-    api_client: VKontakteAPI
+    api_client: VKontakteAPI,
 }
 
 impl MessagesMethods {
     pub fn new(api_client: VKontakteAPI) -> Self {
-        Self {
-            api_client,
-        }
+        Self { api_client }
     }
-    
-    pub async fn delete(&self, params: MessagesDeleteParams) -> Result<MessagesDeleteResponse, VKontakteError> {
+
+    pub async fn delete(
+        &self,
+        params: MessagesDeleteParams,
+    ) -> Result<MessagesDeleteResponse, VKontakteError> {
         self.api_client.api_request("message.delete", params).await
     }
-    
-    pub async fn reset_conversation_style(&self, params: ResetConversationStyleParams) -> Result<ResetConversationStyleResponse, VKontakteError> {
-        self.api_client.api_request("messages.resetConversationStyle", params).await
+
+    pub async fn reset_conversation_style(
+        &self,
+        params: ResetConversationStyleParams,
+    ) -> Result<ResetConversationStyleResponse, VKontakteError> {
+        self.api_client
+            .api_request("messages.resetConversationStyle", params)
+            .await
     }
-    
-    pub async fn set_chat_photo(&self, params: SetChatPhotoParams) -> Result<SetChatPhotoResponse, VKontakteError> {
-        self.api_client.api_request("messages.setChatPhoto", params).await
+
+    pub async fn set_chat_photo(
+        &self,
+        params: SetChatPhotoParams,
+    ) -> Result<SetChatPhotoResponse, VKontakteError> {
+        self.api_client
+            .api_request("messages.setChatPhoto", params)
+            .await
     }
-    
-    pub async fn set_conversation_style(&self, params: SetConversationStyleParams) -> Result<SetConversationStyleResponse, VKontakteError> {
-        self.api_client.api_request("messages.setConversationStyle", params).await
+
+    pub async fn set_conversation_style(
+        &self,
+        params: SetConversationStyleParams,
+    ) -> Result<SetConversationStyleResponse, VKontakteError> {
+        self.api_client
+            .api_request("messages.setConversationStyle", params)
+            .await
     }
 }

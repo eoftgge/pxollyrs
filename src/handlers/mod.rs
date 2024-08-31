@@ -8,8 +8,8 @@ mod sync;
 
 use crate::pxolly::dispatch::compose::ComposeHandler;
 use crate::pxolly::dispatch::dispatcher::{Dispatch, DispatcherBuilder};
-use reqwest::Client;
 use crate::vkontakte::api::VKontakteAPI;
+use reqwest::Client;
 
 pub fn build_dispatcher(
     vkontakte: VKontakteAPI,

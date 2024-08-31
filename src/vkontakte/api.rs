@@ -1,11 +1,11 @@
+use crate::vkontakte::errors::VKontakteError;
+use crate::vkontakte::types::responses::{VKontakteAPIRequestParams, VKontakteAPIResponse};
+use crate::vkontakte::DEFAULT_API_URL_VKONTAKTE;
 use reqwest::Client;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::Debug;
 use std::sync::Arc;
-use crate::vkontakte::DEFAULT_API_URL_VKONTAKTE;
-use crate::vkontakte::errors::VKontakteError;
-use crate::vkontakte::types::responses::{VKontakteAPIRequestParams, VKontakteAPIResponse};
 
 #[derive(Clone)]
 pub struct VKontakteAPI {

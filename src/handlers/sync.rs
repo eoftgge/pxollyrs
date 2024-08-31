@@ -13,15 +13,28 @@ pub struct Sync {
 impl Handler for Sync {
     const EVENT_TYPE: &'static str = "sync";
 
-    async fn handle(&self, event: PxollyEvent) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
-        let message = event.object.message.as_ref().expect("Expect field: messages");
+    async fn handle(
+        &self,
+        event: PxollyEvent,
+    ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+        let message = event
+            .object
+            .message
+            .as_ref()
+            .expect("Expect field: messages");
         let params = serde_json::json!({
             "conversation_message_id": message.conversation_message_id,
             "text": message.text,
             "date": message.date,
             "from_id": message.from_id
         });
-        let peer_id = self.vkontakte.execute::<i64>( ExecuteParams { code: EXECUTE_SYNC_CODE.into(), extras: params }).await?;
+        let peer_id = self
+            .vkontakte
+            .execute::<i64>(ExecuteParams {
+                code: EXECUTE_SYNC_CODE.into(),
+                extras: params,
+            })
+            .await?;
 
         Ok(PxollyWebhookResponse::new(true).local_id(peer_id as u64))
     }

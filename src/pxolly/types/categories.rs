@@ -5,7 +5,7 @@ pub mod callback;
 
 pub trait Categories {
     fn api_client(&self) -> PxollyAPI;
-    
+
     fn callback(&self) -> CallbackMethods {
         CallbackMethods::new(self.api_client())
     }

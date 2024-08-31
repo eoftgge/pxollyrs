@@ -1,7 +1,7 @@
-use axum::Json;
-use axum::response::{IntoResponse, Response};
-use serde::{Deserialize, Serialize};
 use crate::vkontakte::errors::VKontakteError;
+use axum::response::{IntoResponse, Response};
+use axum::Json;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PxollyWebhookError {

@@ -1,6 +1,6 @@
-use thiserror::Error;
 use crate::pxolly::errors::PxollyError;
 use crate::vkontakte::errors::VKontakteError;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum WebhookError {

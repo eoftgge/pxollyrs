@@ -1,8 +1,8 @@
-use std::future::Future;
 use crate::pxolly::dispatch::handler::Handler;
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
+use std::future::Future;
 
 pub trait Dispatch: Send + Sync + 'static {
     fn dispatch(
@@ -37,7 +37,10 @@ where
     Current: Handler + Send + Sync,
     Tail: Dispatch + Send + Sync,
 {
-    async fn dispatch(&self, event: PxollyEvent) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+    async fn dispatch(
+        &self,
+        event: PxollyEvent,
+    ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         let event_type = Current::EVENT_TYPE;
         if event.event_type == event_type {
             return self.current.handle(event).await;

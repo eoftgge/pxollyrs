@@ -1,9 +1,9 @@
+pub mod message;
 pub mod object;
 pub mod user;
-pub mod message;
 
-use serde::Deserialize;
 use crate::pxolly::types::events::object::PxollyObject;
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct PxollyEvent {

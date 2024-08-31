@@ -1,13 +1,16 @@
-use crate::handlers::prelude::{PxollyContext, PxollyResponse};
-use crate::pxolly::dispatch::handler::Handler;
-use crate::WebhookResult;
 use std::future::Future;
+use crate::pxolly::dispatch::handler::Handler;
+use crate::database::conn::DatabaseConnection;
+use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
+use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 
 pub trait Dispatch: Send + Sync + 'static {
     fn dispatch(
         &self,
-        ctx: PxollyContext,
-    ) -> impl Future<Output = WebhookResult<PxollyResponse>> + Send + Sync;
+        event: PxollyEvent,
+        database: DatabaseConnection,
+    ) -> impl Future<Output = Result<PxollyWebhookResponse, PxollyWebhookError>> + Send + Sync;
 }
 
 #[derive(Clone)]
@@ -23,8 +26,11 @@ where
 }
 
 impl Dispatch for DispatcherBuilder {
-    async fn dispatch(&self, _: PxollyContext) -> WebhookResult<PxollyResponse> {
-        Ok(PxollyResponse::Locked) // TODO: implement not found handler
+    async fn dispatch(&self, _: PxollyEvent, _: DatabaseConnection) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+        Err(PxollyWebhookError {
+            error_type: PxollyErrorType::UnknownEvent,
+            message: None,
+        })
     }
 }
 
@@ -33,11 +39,11 @@ where
     Current: Handler + Send + Sync,
     Tail: Dispatch + Send + Sync,
 {
-    async fn dispatch(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
+    async fn dispatch(&self, event: PxollyEvent, database: DatabaseConnection) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         let event_type = Current::EVENT_TYPE;
-        if ctx.event_type == event_type {
-            return self.current.handle(ctx).await;
+        if event.event_type == event_type {
+            return self.current.handle(event, database).await;
         }
-        self.tail.dispatch(ctx).await
+        self.tail.dispatch(event, database).await
     }
 }

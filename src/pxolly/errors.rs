@@ -1,7 +1,7 @@
 use thiserror::Error;
-use crate::pxolly::types::errors::PxollyResponseError;
+use crate::pxolly::types::responses::errors::PxollyResponseError;
 
-#[derive(Error)]
+#[derive(Debug, Error)]
 pub enum PxollyError {
     Http(#[from] reqwest::Error),
     Json(#[from] serde_json::Error),

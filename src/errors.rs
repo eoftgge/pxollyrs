@@ -1,5 +1,6 @@
 use crate::vk::responses::VKAPIError;
 use thiserror::Error;
+use crate::pxolly::errors::PxollyError;
 
 #[derive(Debug, Error)]
 pub enum WebhookError {
@@ -9,6 +10,7 @@ pub enum WebhookError {
     IO(#[from] std::io::Error),
     #[error("VKAPI({}) - {}", .0.error_code, .0.error_msg)]
     VKAPI(VKAPIError),
+    Pxolly(#[from] PxollyError),
     #[error("{0}")]
     Message(String),
 }

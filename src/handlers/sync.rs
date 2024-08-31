@@ -9,7 +9,7 @@ impl Handler for Sync {
     const EVENT_TYPE: &'static str = "sync";
 
     async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        let message = ctx.object.message.as_ref().expect("Expect field: message");
+        let message = ctx.object.message.as_ref().expect("Expect field: messages");
         let params = serde_json::json!({
             "code": EXECUTE_SYNC_CODE,
             "conversation_message_id": message.conversation_message_id,

@@ -1,5 +1,4 @@
-pub mod edit_settings;
-pub mod get_settings;
+mod callback;
 
-pub use edit_settings::EditSettingsParams;
-pub use get_settings::GetSettingsParams;
+pub use callback::edit_settings::EditSettingsParams;
+pub use callback::get_settings::GetSettingsParams;

@@ -1,8 +1,8 @@
 use super::context::PxollyContext;
 use super::dispatcher::Dispatch;
 use crate::database::conn::DatabaseConnection;
-use crate::errors::WebhookError;
 use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::responses::errors;
 use crate::pxolly::types::responses::PxollyResponse;
 use axum::body::Body;
 use axum::extract::FromRequest;
@@ -36,23 +36,8 @@ impl<T: Dispatch> Executor<T> {
         }
 
         let ctx = PxollyContext::new(event, self.database.clone());
-        let response = match self.dispatcher.dispatch(ctx).await {
-            Ok(response) => response,
-            Err(WebhookError::VKAPI(err)) => {
-                log::error!("in the dispatcher occurred api error: {:?}", err);
-                PxollyResponse::ErrorCode(-1)
-            }
-            Err(WebhookError::PxollyResponse(response)) => response,
-            Err(WebhookError::IO(err)) => {
-                log::error!("in the dispatcher occurred io error: {:?}", err);
-                PxollyResponse::ErrorCode(3)
-            }
-            Err(err) => {
-                log::error!("in the dispatcher occurred unknown error: {:?}", err);
-                PxollyResponse::ErrorCode(2)
-            }
-        };
-
+        let response = self.dispatcher.dispatch(ctx).await?;
+        
         log::debug!("response to the sender: {}", response.to_string());
         response
     }

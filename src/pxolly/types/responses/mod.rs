@@ -1,14 +1,16 @@
 pub mod edit_settings;
 pub mod get_settings;
+pub mod errors;
 
 use axum::response::{IntoResponse, Response};
 use std::fmt::{Display, Formatter};
+use crate::pxolly::types::responses::errors::PxollyErrorCode;
 
 #[derive(Debug)]
 pub enum PxollyResponse {
     Text(String),
     ConfirmationCode(String),
-    ErrorCode(i8),
+    ErrorCode(PxollyErrorCode),
     Success,
     Locked,
 }

@@ -5,7 +5,7 @@ use pxollyrs::handlers::build_dispatcher;
 use pxollyrs::pxolly::api::PxollyAPI;
 use pxollyrs::pxolly::dispatch::execute::Executor;
 use pxollyrs::pxolly::types::responses::get_settings::GetSettingsResponse;
-use pxollyrs::vk::client::VKClient;
+use pxollyrs::vkontakte::client::VKClient;
 use std::sync::Arc;
 
 #[tokio::main]

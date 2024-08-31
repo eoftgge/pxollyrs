@@ -3,6 +3,6 @@ pub mod database;
 pub mod errors;
 pub mod handlers;
 pub mod pxolly;
-pub mod vk;
+pub mod vkontakte;
 
 pub use crate::errors::{WebhookError, WebhookResult};

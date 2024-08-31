@@ -1,5 +1,5 @@
 use super::prelude::*;
-use crate::vk::responses::VKAPIError;
+use crate::vkontakte::responses::VKAPIError;
 use serde_json::Value;
 
 pub struct SetTheme {

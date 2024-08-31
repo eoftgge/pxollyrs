@@ -11,12 +11,12 @@ pub mod prelude {
     pub use crate::pxolly::dispatch::context::PxollyContext;
     pub use crate::pxolly::dispatch::handler::Handler;
     pub use crate::pxolly::types::responses::PxollyResponse;
-    pub use crate::vk::client::VKClient;
+    pub use crate::vkontakte::client::VKClient;
 }
 
 use crate::pxolly::dispatch::compose::ComposeHandler;
 use crate::pxolly::dispatch::dispatcher::{Dispatch, DispatcherBuilder};
-use crate::vk::client::VKClient;
+use crate::vkontakte::client::VKClient;
 use reqwest::Client;
 use std::sync::Arc;
 

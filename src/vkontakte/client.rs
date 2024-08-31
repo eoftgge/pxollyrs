@@ -1,5 +1,5 @@
 use crate::errors::{WebhookError, WebhookResult};
-use crate::vk::responses::{VKAPIRequestParams, VKAPIResponse};
+use crate::vkontakte::responses::{VKAPIRequestParams, VKAPIResponse};
 use reqwest::Client;
 use serde::de::DeserializeOwned;
 use serde::Serialize;

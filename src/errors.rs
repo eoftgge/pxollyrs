@@ -1,4 +1,4 @@
-use crate::vk::responses::VKAPIError;
+use crate::vkontakte::responses::VKAPIError;
 use thiserror::Error;
 use crate::pxolly::errors::PxollyError;
 

@@ -3,16 +3,16 @@ use crate::pxolly::types::categories::callback::CallbackMethods;
 
 pub mod callback;
 
-pub struct Categories {
-    api_client: PxollyAPI
+pub trait Categories {
+    fn api_client(&self) -> PxollyAPI;
+    
+    fn callback(&self) -> CallbackMethods {
+        CallbackMethods::new(self.api_client())
+    }
 }
 
-impl Categories {
-    pub fn new(api_client: PxollyAPI) -> Self {
-        Self { api_client }
-    }
-    
-    pub fn callback(&self) -> CallbackMethods {
-        CallbackMethods::new(self.api_client.clone())
+impl Categories for PxollyAPI {
+    fn api_client(&self) -> PxollyAPI {
+        self.clone()
     }
 }

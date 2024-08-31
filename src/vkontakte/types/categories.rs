@@ -9,24 +9,25 @@ use crate::vkontakte::types::params::execute::ExecuteParams;
 pub mod messages;
 pub mod photos;
 
-pub struct Categories {
-    api_client: VKontakteAPI,
+
+pub trait Categories {
+    fn api_client(&self) -> VKontakteAPI;
+    
+    fn messages(&self) -> MessagesMethods {
+        MessagesMethods::new(self.api_client())
+    }
+    
+    fn photos(&self) -> PhotosMethods {
+        PhotosMethods::new(self.api_client())
+    }
+    
+    async fn execute<T: DeserializeOwned + Debug>(&self, params: ExecuteParams) -> Result<T, VKontakteError> {
+        self.api_client().api_request("execute", params).await
+    }
 }
 
-impl Categories {
-    pub fn new(api_client: VKontakteAPI) -> Self {
-        Self { api_client }
-    }
-    
-    pub fn messages(&self) -> MessagesMethods {
-        MessagesMethods::new(self.api_client.clone())
-    }
-    
-    pub fn photos(&self) -> PhotosMethods {
-        PhotosMethods::new(self.api_client.clone())
-    }
-    
-    pub async fn execute<T: DeserializeOwned + Debug>(&self, params: ExecuteParams) -> Result<T, VKontakteError> {
-        self.api_client.api_request("execute", params).await
+impl Categories for VKontakteAPI {
+    fn api_client(&self) -> VKontakteAPI {
+        self.clone()
     }
 }

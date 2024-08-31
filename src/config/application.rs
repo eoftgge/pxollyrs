@@ -1,4 +1,3 @@
-use crate::WebhookResult;
 use log::Level;
 use reqwest::Url;
 use serde::Deserialize;

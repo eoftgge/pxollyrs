@@ -21,5 +21,5 @@ pub struct VKontakteAPIRequestParams<'a> {
     #[serde(rename = "v")]
     pub version: &'a str,
     #[serde(flatten)]
-    pub others: Value,
+    pub extras: Value,
 }

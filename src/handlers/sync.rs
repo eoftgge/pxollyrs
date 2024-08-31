@@ -1,4 +1,4 @@
-use crate::database::models::DatabaseChatModel;
+
 use crate::handlers::prelude::*;
 
 pub struct Sync {

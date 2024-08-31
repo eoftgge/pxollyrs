@@ -36,7 +36,7 @@ impl VKontakteAPI {
         let params = VKontakteAPIRequestParams {
             access_token: &self.access_token,
             version: &self.version,
-            others: serde_json::to_value(params)?
+            extras: serde_json::to_value(params)?
         };
         let response = self
             .client

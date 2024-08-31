@@ -47,7 +47,7 @@ impl PxollyAPI {
         let params = PxollyAPIRequestParams {
             access_token: &self.access_token,
             format: "msgpack",
-            others: serde_json::to_value(params)?,
+            extras: serde_json::to_value(params)?,
         };
         let response = self
             .client

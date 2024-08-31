@@ -23,16 +23,11 @@ impl Handler for SetTheme {
         match self.vkontakte.messages().set_conversation_style(params).await
         {
             Ok(_) => Ok(PxollyWebhookResponse::new(true)),
-            Err(VKontakteError::API(VKontakteAPIError { error_code, .. })) => match error_code {
-                966 => Err(PxollyWebhookError {
+            Err(VKontakteError::API(VKontakteAPIError { error_code: 966, .. })) =>
+                Err(PxollyWebhookError {
                     message: None,
-                    error_type: PxollyErrorType::BotAccessDenied
+                    error_type: PxollyErrorType::BotAccessDenied,
                 }),
-                _ => Err(PxollyWebhookError {
-                    message: None,
-                    error_type: PxollyErrorType::VKontakteAPIError
-                }),
-            },
             _ => Err(PxollyWebhookError {
                 message: None,
                 error_type: PxollyErrorType::VKontakteAPIError,

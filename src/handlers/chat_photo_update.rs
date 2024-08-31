@@ -45,7 +45,7 @@ impl Handler for ChatPhotoUpdate {
             .await?;
         let body = response["response"]
             .as_str()
-            .ok_or_else(|| PxollyWebhookError::internal_server())?;
+            .ok_or_else(PxollyWebhookError::internal_server)?;
         self.vkontakte.messages().set_chat_photo(SetChatPhotoParams { file: body.into() }).await?;
 
         Ok(PxollyWebhookResponse::new(true))

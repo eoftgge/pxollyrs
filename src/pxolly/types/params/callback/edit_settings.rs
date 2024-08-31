@@ -2,7 +2,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct EditSettingsParams {
-    url: Option<String>,
-    secret_key: Option<String>,
-    is_hidden: bool,
+    pub url: Option<String>,
+    pub secret_key: Option<String>,
+    pub is_hidden: bool,
 }

@@ -2,5 +2,5 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct GetSettingsParams {
-    v: &'static str,
+    pub v: &'static str,
 }

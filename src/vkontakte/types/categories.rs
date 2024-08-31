@@ -10,7 +10,7 @@ pub mod messages;
 pub mod photos;
 
 
-pub trait Categories {
+pub trait Categories: Send + Sync + 'static {
     fn api_client(&self) -> VKontakteAPI;
     
     fn messages(&self) -> MessagesMethods {
@@ -21,8 +21,8 @@ pub trait Categories {
         PhotosMethods::new(self.api_client())
     }
     
-    async fn execute<T: DeserializeOwned + Debug>(&self, params: ExecuteParams) -> Result<T, VKontakteError> {
-        self.api_client().api_request("execute", params).await
+    fn execute<T: DeserializeOwned + Debug>(&self, params: ExecuteParams) -> impl std::future::Future<Output = Result<T, VKontakteError>> + Send + Sync + '_ {
+        async { self.api_client().api_request("execute", params).await }
     }
 }
 

@@ -1,23 +1,23 @@
 use axum::{routing::post, Router};
 use pxollyrs::config::WebhookConfig;
-use pxollyrs::database::conn::DatabaseConnection;
 use pxollyrs::handlers::build_dispatcher;
 use pxollyrs::pxolly::api::PxollyAPI;
+use pxollyrs::pxolly::DEFAULT_VERSION_PXOLLY;
 use pxollyrs::pxolly::dispatch::execute::Executor;
-use pxollyrs::pxolly::types::responses::get_settings::GetSettingsResponse;
-use pxollyrs::vkontakte::client::VKClient;
-use std::sync::Arc;
+use pxollyrs::pxolly::types::categories::Categories;
+use pxollyrs::pxolly::types::params::{EditSettingsParams, GetSettingsParams};
+use pxollyrs::pxolly::types::responses::callback::GetSettingsResponse;
+use pxollyrs::vkontakte::api::VKontakteAPI;
 
 #[tokio::main]
-async fn main() -> pxollyrs::errors::WebhookResult<()> {
+async fn main() -> Result<(), pxollyrs::errors::WebhookError> {
     let config = WebhookConfig::new().await?;
     config.application().logger().set_level();
 
-    let (addr, host) = config.application().server().addr_and_host().await?;
-    let conn = DatabaseConnection::new(config.application().database().path()).await?;
-    let http_client = Arc::new(reqwest::Client::new());
+    let (addr, host) = config.application().server().addr_and_host().await;
+    let http_client = reqwest::Client::new();
     let pxolly_client = PxollyAPI::new(http_client.clone(), config.pxolly().token());
-    let vk_client = VKClient::new(
+    let vk_client = VKontakteAPI::new(
         http_client.clone(),
         config.vk().token(),
         config.vk().version(),
@@ -27,9 +27,9 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
         confirm_code,
         secret_key,
         ..
-    } = pxolly_client.callback().get_settings().await?;
+    } = pxolly_client.callback().get_settings(GetSettingsParams { v: DEFAULT_VERSION_PXOLLY }).await?;
     let dispatcher = build_dispatcher(vk_client, http_client, confirm_code);
-    let executor = Executor::new(dispatcher, conn, &secret_key);
+    let executor = Executor::new(dispatcher, &secret_key);
     let app = Router::new().route("/", post(executor));
     let listener = tokio::net::TcpListener::bind(addr).await?;
     log::info!("Server is starting! (addr: {}; host: {})", addr, host);
@@ -41,9 +41,7 @@ async fn main() -> pxollyrs::errors::WebhookResult<()> {
 
         let response = pxolly_client
             .callback()
-            .edit_settings()
-            .set_url(host)
-            .set_secret_key(&secret_key)
+            .edit_settings(EditSettingsParams { secret_key: Some(secret_key), url: Some(host.into()), is_hidden: false })
             .await;
 
         if let Ok(response) = response {

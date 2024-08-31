@@ -25,12 +25,12 @@ async fn into_response<T: DeserializeOwned + Debug>(
 
 #[derive(Clone)]
 pub struct PxollyAPI {
-    client: Arc<Client>,
+    client: Client,
     access_token: Arc<str>,
 }
 
 impl PxollyAPI {
-    pub fn new(client: Arc<Client>, access_token: impl Into<String>) -> Self {
+    pub fn new(client: Client, access_token: impl Into<String>) -> Self {
         Self {
             client,
             access_token: Arc::from(access_token.into()),

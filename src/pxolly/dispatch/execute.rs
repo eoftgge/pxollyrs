@@ -1,9 +1,5 @@
-use super::context::PxollyContext;
-use super::dispatcher::Dispatch;
-use crate::database::conn::DatabaseConnection;
 use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::errors;
-use crate::pxolly::types::responses::PxollyResponse;
 use axum::body::Body;
 use axum::extract::FromRequest;
 use axum::http::Request;
@@ -12,34 +8,36 @@ use axum::Json;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
+use crate::pxolly::dispatch::dispatcher::Dispatch;
+use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
+use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 
 pub struct Executor<T: Dispatch> {
     dispatcher: Arc<T>,
     secret_key: String,
-    database: DatabaseConnection,
 }
 
 impl<T: Dispatch> Executor<T> {
-    pub fn new(dispatcher: T, database: DatabaseConnection, secret_key: impl Into<String>) -> Self {
+    pub fn new(dispatcher: T, secret_key: impl Into<String>) -> Self {
         Self {
             dispatcher: Arc::new(dispatcher),
             secret_key: secret_key.into(),
-            database,
         }
     }
 
-    async fn execute(&self, Json(event): Json<PxollyEvent>) -> PxollyResponse {
+    async fn execute(&self, Json(event): Json<PxollyEvent>) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         log::debug!("received the event: {:?}", event);
 
         if event.secret_key != self.secret_key {
-            return PxollyResponse::Locked;
+            return Err(PxollyWebhookError {
+                message: None,
+                error_type: PxollyErrorType::AccessDenied,
+            });
         }
 
-        let ctx = PxollyContext::new(event, self.database.clone());
-        let response = self.dispatcher.dispatch(ctx).await?;
-        
-        log::debug!("response to the sender: {}", response.to_string());
-        response
+        let response = self.dispatcher.dispatch(event).await?;
+        log::debug!("response to the server: {}", response.to_string());
+        Ok(response)
     }
 }
 
@@ -47,7 +45,6 @@ impl<T: Dispatch> Clone for Executor<T> {
     fn clone(&self) -> Self {
         Self {
             dispatcher: Arc::clone(&self.dispatcher),
-            database: self.database.clone(),
             secret_key: self.secret_key.clone(),
         }
     }
@@ -58,12 +55,15 @@ impl<E: Dispatch, S: Send + Sync + 'static> axum::handler::Handler<(), S> for Ex
 
     fn call(self, req: Request<Body>, state: S) -> Self::Future {
         Box::pin(async move {
-            self.execute(match Json::from_request(req, &state).await {
+            let event = match Json::from_request(req, &state).await {
                 Ok(event) => event,
                 Err(err) => return err.into_response(),
-            })
-            .await
-            .into_response()
+            };
+            let result = self.execute(event).await;
+            match result {
+                Ok(response) => response.into_response(),
+                Err(err) => err.into_response(),
+            }
         })
     }
 }

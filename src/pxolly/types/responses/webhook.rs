@@ -1,3 +1,6 @@
+use axum::http::StatusCode;
+use axum::Json;
+use axum::response::{IntoResponse, Response};
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -22,5 +25,12 @@ impl PxollyWebhookResponse {
     pub fn local_id(mut self, local_id: i64) -> Self {
         self.local_id = Some(local_id);
         self
+    }
+}
+
+impl IntoResponse for PxollyWebhookResponse {
+    fn into_response(self) -> Response {
+        let json = Json(self);
+        json.into_response()
     }
 }

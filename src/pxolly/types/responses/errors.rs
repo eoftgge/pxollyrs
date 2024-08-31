@@ -1,3 +1,5 @@
+use axum::Json;
+use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -16,9 +18,17 @@ pub enum PxollyErrorType {
     UnknownEvent,
     #[serde(rename = "VK_API_ERROR")]
     VKontakteAPIError,
+    AccessDenied,
     BotAccessDenied,
     NotInFriends,
     InvalidPrivacySettingsForInvite,
     #[serde(rename = "VK_LIMITS_REACHED")]
     VKontakteLimitsReached,
+}
+
+impl IntoResponse for PxollyErrorType {
+    fn into_response(self) -> Response {
+        let json = Json(self);
+        json.into_response()
+    }
 }

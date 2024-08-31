@@ -1,10 +1,11 @@
-use crate::errors::{WebhookError, WebhookResult};
-use crate::vkontakte::responses::{VKAPIRequestParams, VKAPIResponse};
 use reqwest::Client;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::Debug;
 use std::sync::Arc;
+use crate::vkontakte::DEFAULT_API_URL_VKONTAKTE;
+use crate::vkontakte::errors::VKontakteError;
+use crate::vkontakte::types::responses::{VKontakteAPIRequestParams, VKontakteAPIResponse};
 
 #[derive(Clone)]
 pub struct VKClient {
@@ -30,33 +31,27 @@ impl VKClient {
         &self,
         method: impl Into<String>,
         params: impl Serialize,
-    ) -> WebhookResult<T> {
+    ) -> Result<T, VKontakteError> {
+        let url = format!("{}{}", DEFAULT_API_URL_VKONTAKTE, method.into());
+        let params = VKontakteAPIRequestParams {
+            access_token: &self.access_token,
+            version: &self.version,
+            others: serde_json::to_value(params)?
+        };
         let response = self
             .client
-            .post(self.create_url(method.into()))
+            .post(url)
             .form(&self.create_params(params)?)
             .send()
             .await?
-            .json::<VKAPIResponse<T>>()
+            .json::<VKontakteAPIResponse<T>>()
             .await?;
 
         log::debug!("sent the request to VK API, response: {:?}", response);
 
         match response {
-            VKAPIResponse::Response(response) => Ok(response),
-            VKAPIResponse::Error(error) => Err(WebhookError::VKAPI(error)),
+            VKontakteAPIResponse::Response(response) => Ok(response),
+            VKontakteAPIResponse::Error(error) => Err(VKontakteError::API(error)),
         }
-    }
-
-    fn create_url(&self, method_name: String) -> String {
-        format!("{}{}", API_URL, method_name)
-    }
-
-    fn create_params(&self, params: impl Serialize) -> WebhookResult<VKAPIRequestParams> {
-        Ok(VKAPIRequestParams {
-            access_token: &self.access_token,
-            version: &self.version,
-            others: serde_json::to_value(params)?,
-        })
     }
 }

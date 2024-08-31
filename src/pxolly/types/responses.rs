@@ -22,7 +22,7 @@ pub struct PxollyAPIError {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PxollyRequestParams {
-    key: String,
-    value: String,
+    pub key: String,
+    pub value: String,
 }
 

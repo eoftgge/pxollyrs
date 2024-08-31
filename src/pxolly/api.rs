@@ -42,7 +42,7 @@ impl PxollyAPI {
         &self,
         method: impl Into<String>,
         params: impl Serialize,
-    ) -> Result<PxollyAPIResponse<T>, PxollyError> {
+    ) -> Result<T, PxollyError> {
         let url = format!("{}{}", DEFAULT_API_URL_PXOLLY, method.into());
         let params = PxollyAPIRequestParams {
             access_token: &self.access_token,

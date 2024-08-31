@@ -1,7 +1,7 @@
 use crate::pxolly::types::params::{EditSettingsParams, GetSettingsParams};
 use crate::pxolly::api::PxollyAPI;
-use crate::pxolly::types::responses::{EditSettingsResponse, GetSettingsResponse};
-use crate::WebhookResult;
+use crate::pxolly::errors::PxollyError;
+use crate::pxolly::types::responses::callback::{EditSettingsResponse, GetSettingsResponse};
 
 pub struct CallbackMethods {
     api_client: PxollyAPI,
@@ -12,11 +12,11 @@ impl CallbackMethods {
         Self { api_client }
     }
 
-    pub async fn edit_settings(&self, params: EditSettingsParams) -> WebhookResult<EditSettingsResponse> {
+    pub async fn edit_settings(&self, params: EditSettingsParams) -> Result<EditSettingsResponse, PxollyError> {
         self.api_client.api_request("callback.editSettings", params).await
     }
 
-    pub async fn get_settings(&self, params: GetSettingsParams) -> WebhookResult<GetSettingsResponse> {
+    pub async fn get_settings(&self, params: GetSettingsParams) -> Result<GetSettingsResponse, PxollyError> {
         self.api_client.api_request("callback.getSettings", params).await
     }
 }

@@ -6,42 +6,33 @@ mod reset_theme;
 mod set_theme;
 mod sync;
 
-pub mod prelude {
-    pub use crate::errors::{WebhookError, WebhookResult};
-    pub use crate::pxolly::dispatch::context::PxollyContext;
-    pub use crate::pxolly::dispatch::handler::Handler;
-    pub use crate::pxolly::types::responses::PxollyResponse;
-    pub use crate::vk::client::VKClient;
-}
-
-use crate::pxolly::dispatch::dispatcher::{DispatcherBuilder, PushHandler};
-use crate::pxolly::dispatch::execute::Dispatch;
-use crate::vk::client::VKClient;
+use crate::pxolly::dispatch::compose::ComposeHandler;
+use crate::pxolly::dispatch::dispatcher::{Dispatch, DispatcherBuilder};
+use crate::vkontakte::api::VKontakteAPI;
 use reqwest::Client;
-use std::sync::Arc;
 
 pub fn build_dispatcher(
-    vk_client: VKClient,
-    http_client: Arc<Client>,
+    vkontakte: VKontakteAPI,
+    http: Client,
     confirmation_code: String,
 ) -> impl Dispatch {
     DispatcherBuilder
-        .push_handler(chat_photo_update::ChatPhotoUpdate {
-            vk_client: vk_client.clone(),
-            http_client,
+        .compose(chat_photo_update::ChatPhotoUpdate {
+            vkontakte: vkontakte.clone(),
+            http,
         })
-        .push_handler(delete_for_all::DeleteForAll {
-            vk_client: vk_client.clone(),
+        .compose(delete_for_all::DeleteForAll {
+            vkontakte: vkontakte.clone(),
         })
-        .push_handler(invite_user::InviteUser {
-            vk_client: vk_client.clone(),
+        .compose(invite_user::InviteUser {
+            vkontakte: vkontakte.clone(),
         })
-        .push_handler(reset_theme::ResetTheme {
-            vk_client: vk_client.clone(),
+        .compose(reset_theme::ResetTheme {
+            vkontakte: vkontakte.clone(),
         })
-        .push_handler(set_theme::SetTheme {
-            vk_client: vk_client.clone(),
+        .compose(set_theme::SetTheme {
+            vkontakte: vkontakte.clone(),
         })
-        .push_handler(sync::Sync { vk_client })
-        .push_handler(confirmation::Confirmation { confirmation_code })
+        .compose(sync::Sync { vkontakte })
+        .compose(confirmation::Confirmation { confirmation_code })
 }

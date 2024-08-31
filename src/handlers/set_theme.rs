@@ -1,33 +1,45 @@
-use super::prelude::*;
-use crate::vk::responses::VKAPIError;
-use serde_json::Value;
+use crate::pxolly::dispatch::handler::Handler;
+use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
+use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
+use crate::vkontakte::api::VKontakteAPI;
+use crate::vkontakte::errors::VKontakteError;
+use crate::vkontakte::types::categories::Categories;
+use crate::vkontakte::types::params::messages::set_conversation_style::SetConversationStyleParams;
+use crate::vkontakte::types::responses::VKontakteAPIError;
 
 pub struct SetTheme {
-    pub(crate) vk_client: VKClient,
+    pub(crate) vkontakte: VKontakteAPI,
 }
 
 impl Handler for SetTheme {
     const EVENT_TYPE: &'static str = "set_theme";
 
-    async fn handle(&self, ctx: PxollyContext) -> WebhookResult<PxollyResponse> {
-        let params = serde_json::json!({
-            "peer_id": ctx.peer_id().await?,
-            "style": ctx.object.style.as_ref().expect("Expect field: style")
-        });
-
-        let response = match self
-            .vk_client
-            .api_request::<Value>("messages.setConversationStyle", params)
+    async fn handle(
+        &self,
+        event: PxollyEvent,
+    ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+        let params = SetConversationStyleParams {
+            peer_id: (event.object.chat_local_id.unwrap() + 2_000_000_000) as i64,
+            style: event.object.style.unwrap(),
+        };
+        match self
+            .vkontakte
+            .messages()
+            .set_conversation_style(params)
             .await
         {
-            Ok(_) => PxollyResponse::Success,
-            Err(WebhookError::VKAPI(VKAPIError { error_code, .. })) => match error_code {
-                966 => PxollyResponse::ErrorCode(-1),
-                _ => PxollyResponse::ErrorCode(0),
-            },
-            _ => PxollyResponse::ErrorCode(2),
-        };
-
-        Ok(response)
+            Ok(_) => Ok(PxollyWebhookResponse::new(true)),
+            Err(VKontakteError::API(VKontakteAPIError {
+                error_code: 966, ..
+            })) => Err(PxollyWebhookError {
+                message: None,
+                error_type: PxollyErrorType::BotAccessDenied,
+            }),
+            _ => Err(PxollyWebhookError {
+                message: None,
+                error_type: PxollyErrorType::VKontakteAPIError,
+            }),
+        }
     }
 }

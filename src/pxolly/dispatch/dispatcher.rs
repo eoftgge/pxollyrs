@@ -1,51 +1,50 @@
 use crate::pxolly::dispatch::handler::Handler;
-use std::sync::Arc;
+use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
+use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
+use std::future::Future;
 
-pub struct Dispatcher<H: Handler, Tail: Clone> {
-    pub(crate) handler: Arc<H>,
-    pub(crate) tail: Tail,
-}
-
-impl<H: Handler, Tail: Clone> Clone for Dispatcher<H, Tail> {
-    fn clone(&self) -> Self {
-        Self {
-            handler: Arc::clone(&self.handler),
-            tail: self.tail.clone(),
-        }
-    }
+pub trait Dispatch: Send + Sync + 'static {
+    fn dispatch(
+        &self,
+        event: PxollyEvent,
+    ) -> impl Future<Output = Result<PxollyWebhookResponse, PxollyWebhookError>> + Send + Sync;
 }
 
 #[derive(Clone)]
 pub struct DispatcherBuilder;
 
-pub trait PushHandler<NewHandler> {
-    type Out;
-    fn push_handler(self, handler: NewHandler) -> Self::Out;
+pub struct Dispatcher<Current, Tail>
+where
+    Current: Handler,
+    Tail: Dispatch,
+{
+    pub(crate) current: Current,
+    pub(crate) tail: Tail,
 }
 
-impl<NewHandler: Handler> PushHandler<NewHandler> for DispatcherBuilder {
-    type Out = Dispatcher<NewHandler, DispatcherBuilder>;
-
-    fn push_handler(self, handler: NewHandler) -> Self::Out {
-        Dispatcher {
-            handler: Arc::new(handler),
-            tail: DispatcherBuilder,
-        }
+impl Dispatch for DispatcherBuilder {
+    async fn dispatch(&self, _: PxollyEvent) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+        Err(PxollyWebhookError {
+            error_type: PxollyErrorType::UnknownEvent,
+            message: None,
+        })
     }
 }
 
-impl<H, Tail, NewHandler> PushHandler<NewHandler> for Dispatcher<H, Tail>
+impl<Current, Tail> Dispatch for Dispatcher<Current, Tail>
 where
-    Tail: PushHandler<NewHandler> + Clone,
-    H: Handler,
-    <Tail as PushHandler<NewHandler>>::Out: Clone,
+    Current: Handler + Send + Sync,
+    Tail: Dispatch + Send + Sync,
 {
-    type Out = Dispatcher<H, <Tail as PushHandler<NewHandler>>::Out>;
-
-    fn push_handler(self, handler: NewHandler) -> Self::Out {
-        Dispatcher {
-            handler: self.handler,
-            tail: self.tail.push_handler(handler),
+    async fn dispatch(
+        &self,
+        event: PxollyEvent,
+    ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
+        let event_type = Current::EVENT_TYPE;
+        if event.event_type == event_type {
+            return self.current.handle(event).await;
         }
+        self.tail.dispatch(event).await
     }
 }

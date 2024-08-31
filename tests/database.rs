@@ -1,9 +1,9 @@
-use pxollyrs::database::conn::DatabaseConn;
+use pxollyrs::database::conn::DatabaseConnection;
 use pxollyrs::WebhookResult;
 
 #[tokio::test]
 async fn test_database() -> WebhookResult<()> {
-    let conn = DatabaseConn::new("test_chat.json").await?;
+    let conn = DatabaseConnection::new("test_chat.json").await?;
     let mut guard = conn.lock().await;
 
     let bytes = guard.read().await?;

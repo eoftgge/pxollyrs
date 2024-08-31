@@ -1,10 +1,9 @@
 pub mod edit_settings;
 pub mod get_settings;
-pub mod errors;
 
 use axum::response::{IntoResponse, Response};
 use std::fmt::{Display, Formatter};
-use crate::pxolly::types::responses::errors::PxollyErrorCode;
+use crate::pxolly::types::errors::PxollyErrorCode;
 
 #[derive(Debug)]
 pub enum PxollyResponse {

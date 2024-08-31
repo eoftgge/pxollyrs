@@ -2,5 +2,5 @@ use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct GetChatUploadServerParams {
-    chat_id: u64,
+    pub(crate) chat_id: u64,
 }

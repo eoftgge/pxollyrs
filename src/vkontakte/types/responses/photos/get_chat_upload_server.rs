@@ -2,5 +2,5 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct GetChatUploadServerResponse {
-    upload_url: String,
+    pub upload_url: String,
 }

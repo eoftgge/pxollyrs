@@ -11,8 +11,6 @@ pub struct ApplicationConfig {
     server: ServerConfig,
     #[serde(default)]
     logger: LoggerConfig,
-    #[serde(default)]
-    database: DatabaseConfig,
 }
 
 impl ApplicationConfig {
@@ -22,10 +20,6 @@ impl ApplicationConfig {
 
     pub fn logger(&self) -> &LoggerConfig {
         &self.logger
-    }
-
-    pub fn database(&self) -> &DatabaseConfig {
-        &self.database
     }
 }
 
@@ -76,18 +70,5 @@ impl LoggerConfig {
 
     pub fn set_level(&self) {
         simple_logger::init_with_level(self.level()).unwrap();
-    }
-}
-
-#[derive(Deserialize, Default)]
-pub struct DatabaseConfig {
-    path: Option<PathBuf>,
-}
-
-impl DatabaseConfig {
-    pub fn path(&self) -> PathBuf {
-        self.path
-            .clone()
-            .unwrap_or_else(|| PathBuf::from("chats.json"))
     }
 }

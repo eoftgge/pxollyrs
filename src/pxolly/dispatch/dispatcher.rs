@@ -1,8 +1,8 @@
 use crate::pxolly::dispatch::handler::Handler;
+use crate::pxolly::types::events::event::PxollyEvent;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use std::future::Future;
-use crate::pxolly::types::events::event::PxollyEvent;
 
 pub trait Dispatch: Send + Sync + 'static {
     fn dispatch(
@@ -50,7 +50,7 @@ where
                     return Err(PxollyWebhookError {
                         message: Some(err.to_string()),
                         error_type: PxollyErrorType::InternalServerError,
-                    })
+                    });
                 }
             };
             return self.current.handle(object).await;

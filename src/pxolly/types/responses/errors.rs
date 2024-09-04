@@ -34,7 +34,7 @@ impl PxollyWebhookError {
             error_type: PxollyErrorType::ChatNotFound,
         }
     }
-    
+
     pub fn internal_server() -> Self {
         Self {
             message: None,

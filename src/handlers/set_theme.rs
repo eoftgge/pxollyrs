@@ -1,4 +1,3 @@
-use serde::Deserialize;
 use crate::pxolly::dispatch::handler::Handler;
 use crate::pxolly::types::events::event_type::EventType;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
@@ -8,6 +7,7 @@ use crate::vkontakte::errors::VKontakteError;
 use crate::vkontakte::types::categories::Categories;
 use crate::vkontakte::types::params::messages::set_conversation_style::SetConversationStyleParams;
 use crate::vkontakte::types::responses::VKontakteAPIError;
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct SetThemeObject {
@@ -29,7 +29,10 @@ impl Handler for SetTheme {
         object: Self::EventObject,
     ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         let params = SetConversationStyleParams {
-            peer_id: (object.chat_local_id.ok_or_else(PxollyWebhookError::chat_not_found)? + 2_000_000_000) as i64,
+            peer_id: (object
+                .chat_local_id
+                .ok_or_else(PxollyWebhookError::chat_not_found)?
+                + 2_000_000_000) as i64,
             style: object.style,
         };
         match self

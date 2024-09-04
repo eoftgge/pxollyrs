@@ -1,4 +1,3 @@
-use serde::Deserialize;
 use crate::pxolly::dispatch::handler::Handler;
 use crate::pxolly::types::events::event_type::EventType;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
@@ -6,6 +5,7 @@ use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use crate::vkontakte::api::VKontakteAPI;
 use crate::vkontakte::types::categories::Categories;
 use crate::vkontakte::types::params::execute::ExecuteParams;
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct InviteUserObject {

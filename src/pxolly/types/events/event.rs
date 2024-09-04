@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use crate::pxolly::types::events::event_type::EventType;
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct PxollyEvent {

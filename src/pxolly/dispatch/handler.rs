@@ -1,8 +1,8 @@
+use crate::pxolly::types::events::event_type::EventType;
 use crate::pxolly::types::responses::errors::PxollyWebhookError;
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
-use std::future::Future;
 use serde::de::DeserializeOwned;
-use crate::pxolly::types::events::event_type::EventType;
+use std::future::Future;
 
 pub trait Handler: Send + Sync + 'static {
     const EVENT_TYPE: EventType;

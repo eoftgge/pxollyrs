@@ -1,4 +1,5 @@
 use crate::pxolly::dispatch::handler::Handler;
+use crate::pxolly::types::events::event_type::EventType;
 use crate::pxolly::types::responses::errors::PxollyWebhookError;
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use crate::vkontakte::api::VKontakteAPI;
@@ -8,7 +9,6 @@ use crate::vkontakte::types::params::photos::get_chat_upload_server::GetChatUplo
 use reqwest::multipart::{Form, Part};
 use reqwest::Client;
 use serde::Deserialize;
-use crate::pxolly::types::events::event_type::EventType;
 
 #[derive(Debug, Clone, Deserialize)]
 struct UploadPhotoResponse {
@@ -36,7 +36,9 @@ impl Handler for ChatPhotoUpdate {
         &self,
         object: Self::EventObject,
     ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
-        let chat_id = object.chat_local_id.ok_or_else(PxollyWebhookError::chat_not_found)?;
+        let chat_id = object
+            .chat_local_id
+            .ok_or_else(PxollyWebhookError::chat_not_found)?;
         let params = GetChatUploadServerParams { chat_id };
         let response = self
             .vkontakte

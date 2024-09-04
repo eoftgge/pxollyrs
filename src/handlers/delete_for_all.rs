@@ -1,4 +1,3 @@
-use serde::Deserialize;
 use crate::pxolly::dispatch::handler::Handler;
 use crate::pxolly::types::events::event_type::EventType;
 use crate::pxolly::types::responses::errors::PxollyWebhookError;
@@ -6,12 +5,13 @@ use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use crate::vkontakte::api::VKontakteAPI;
 use crate::vkontakte::types::categories::Categories;
 use crate::vkontakte::types::params::messages::delete::MessagesDeleteParams;
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DeleteForAllObject {
     chat_id: String,
     chat_local_id: Option<u64>,
-    conversation_message_ids: Vec<u64>, 
+    conversation_message_ids: Vec<u64>,
 }
 
 pub struct DeleteForAll {
@@ -26,7 +26,9 @@ impl Handler for DeleteForAll {
         &self,
         object: DeleteForAllObject,
     ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
-        let chat_id = object.chat_local_id.ok_or_else(PxollyWebhookError::chat_not_found)?;
+        let chat_id = object
+            .chat_local_id
+            .ok_or_else(PxollyWebhookError::chat_not_found)?;
         let params = MessagesDeleteParams {
             peer_id: (chat_id + 2_000_000_000) as i64,
             delete_for_all: 1,

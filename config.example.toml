@@ -4,7 +4,7 @@ token = "v8x.Cym..."
 
 [vk]
 # strdecimal: - версия API, крайне не рекомендуется менять версию
-version = "5.131"
+version = "5.199"
 # str: - токен от Вконтакте
 token = "vk1.a.DU..."
 

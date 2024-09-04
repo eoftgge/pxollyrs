@@ -1,4 +1,1 @@
-use serde::Deserialize;
-
-#[derive(Debug, Deserialize)]
-pub struct ResetConversationStyleResponse;
+pub type ResetConversationStyleResponse = i64;

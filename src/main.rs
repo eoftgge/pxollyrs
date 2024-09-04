@@ -1,11 +1,11 @@
 use axum::{routing::post, Router};
+use pxollyrs::auto_bind::auto_bind;
 use pxollyrs::config::WebhookConfig;
 use pxollyrs::handlers::build_dispatcher;
-use pxollyrs::migration::run_migration_chat_ids;
 use pxollyrs::pxolly::api::PxollyAPI;
 use pxollyrs::pxolly::dispatch::execute::Executor;
 use pxollyrs::pxolly::types::categories::Categories;
-use pxollyrs::pxolly::types::params::{EditSettingsParams, GetSettingsParams};
+use pxollyrs::pxolly::types::params::GetSettingsParams;
 use pxollyrs::pxolly::types::responses::callback::GetSettingsResponse;
 use pxollyrs::pxolly::DEFAULT_VERSION_PXOLLY;
 use pxollyrs::vkontakte::api::VKontakteAPI;
@@ -27,6 +27,7 @@ async fn main() -> Result<(), pxollyrs::errors::WebhookError> {
     let GetSettingsResponse {
         confirm_code,
         secret_key,
+        url,
         ..
     } = pxolly_client
         .callback()
@@ -40,29 +41,11 @@ async fn main() -> Result<(), pxollyrs::errors::WebhookError> {
     let listener = tokio::net::TcpListener::bind(addr).await?;
     // TODO: run_migration_chat_ids(pxolly_client.clone()).await; 
     log::info!("Server is starting! (addr: {}; host: {})", addr, host);
-    
-    let auto_bind = async move {
-        if !config.application().is_bind {
-            return;
-        }
-
-        let response = pxolly_client
-            .callback()
-            .edit_settings(EditSettingsParams {
-                secret_key: Some(secret_key),
-                url: Some(host.into()),
-                is_hidden: false,
-            })
-            .await;
-
-        if let Ok(response) = response {
-            log::info!("Result bind webhook: {:?}", response)
-        } else if let Err(error) = response {
-            log::error!("Failed bind webhook: {:?}", error)
-        }
-    };
 
     let server = axum::serve(listener, app);
-    let (_, _) = tokio::join!(async move { server.await.unwrap() }, auto_bind);
+    let (_, _) = tokio::join!(
+        async move { server.await.unwrap() }, 
+        auto_bind(pxolly_client, config.application().is_bind, secret_key, host.into(), url)
+    );
     Ok(())
 }

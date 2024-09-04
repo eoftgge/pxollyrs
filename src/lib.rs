@@ -6,3 +6,4 @@ pub mod handlers;
 pub mod pxolly;
 pub mod vkontakte;
 pub mod migration;
+pub mod auto_bind;

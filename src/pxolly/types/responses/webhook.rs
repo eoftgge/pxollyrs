@@ -45,7 +45,7 @@ impl PxollyWebhookResponse {
     }
 }
 
-impl IntoResponse for PxollyWebhookResponse {
+impl IntoResponse for WebhookResponse {
     fn into_response(self) -> Response {
         let json = Json(self);
         Json::into_response(json)

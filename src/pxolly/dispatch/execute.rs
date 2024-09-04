@@ -1,7 +1,7 @@
 use crate::pxolly::dispatch::dispatcher::Dispatch;
 use crate::pxolly::types::events::event::PxollyEvent;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
-use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
+use crate::pxolly::types::responses::webhook::{PxollyWebhookResponse, WebhookResponse};
 use axum::body::Body;
 use axum::extract::FromRequest;
 use axum::http::Request;
@@ -63,10 +63,11 @@ impl<E: Dispatch, S: Send + Sync + 'static> axum::handler::Handler<(), S> for Ex
                 Err(err) => return err.into_response(),
             };
             let result = self.execute(event).await;
-            match result {
-                Ok(response) => response.into_response(),
-                Err(err) => err.into_response(),
-            }
+            let response = match result {
+                Ok(response) => WebhookResponse::Ok(response),
+                Err(err) => WebhookResponse::Error(err),
+            };
+            response.into_response()
         })
     }
 }

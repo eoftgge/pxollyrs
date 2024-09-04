@@ -1,6 +1,4 @@
 use crate::vkontakte::errors::VKontakteError;
-use axum::response::{IntoResponse, Response};
-use axum::Json;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -59,12 +57,5 @@ impl From<VKontakteError> for PxollyWebhookError {
             message: None,
             error_type: PxollyErrorType::VKontakteAPIError,
         }
-    }
-}
-
-impl IntoResponse for PxollyWebhookError {
-    fn into_response(self) -> Response {
-        let json = Json(self);
-        json.into_response()
     }
 }

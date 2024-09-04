@@ -47,14 +47,11 @@ impl VKontakteAPI {
             .send()
             .await?;
 
-        log::debug!("sent the request to VK API, response: {:?}", response);
         let response = response.json::<VKontakteAPIResponse<T>>().await?;
+        log::debug!("sent the request to VK API, response: {:?}", response);
         match response {
             VKontakteAPIResponse::Response(response) => Ok(response),
-            VKontakteAPIResponse::Error(error) => {
-                log::error!("failed sent the request to vk: {:?}", error);
-                Err(VKontakteError::API(error))
-            }
+            VKontakteAPIResponse::Error(error) => Err(VKontakteError::API(error))
         }
     }
 }

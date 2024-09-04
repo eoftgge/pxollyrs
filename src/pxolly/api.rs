@@ -56,13 +56,12 @@ impl PxollyAPI {
             .body(body)
             .send()
             .await?;
+        let response = into_response(response).await?;
         log::debug!(
             "Got a response from @pxolly, content({}): {:?}",
             url,
             response
         );
-
-        let response = into_response(response).await?;
         match response {
             PxollyAPIResponse::Response(ok) => Ok(ok),
             PxollyAPIResponse::Error(err) => Err(PxollyError::API(err)),

@@ -1,5 +1,5 @@
 use crate::pxolly::dispatch::dispatcher::Dispatch;
-use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::events::event::PxollyEvent;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use axum::body::Body;

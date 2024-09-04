@@ -12,7 +12,7 @@ pub struct InviteUserObject {
     chat_id: String,
     chat_local_id: Option<u64>,
     user_id: u64,
-    is_expired: u8,
+    is_expired: Option<u8>,
     visible_messages_count: Option<u8>, // В доке такого нет, но раньше точно было. Поэтому так
 }
 

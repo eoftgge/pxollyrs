@@ -1,5 +1,6 @@
 use crate::vkontakte::errors::VKontakteError;
 use serde::{Deserialize, Serialize};
+use crate::vkontakte::types::responses::VKontakteAPIError;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PxollyWebhookError {
@@ -51,11 +52,24 @@ impl From<reqwest::Error> for PxollyWebhookError {
 }
 
 impl From<VKontakteError> for PxollyWebhookError {
-    fn from(_: VKontakteError) -> Self {
-        // TODO: also realise for limits reached and another
-        Self {
-            message: None,
-            error_type: PxollyErrorType::VKontakteAPIError,
+    fn from(err: VKontakteError) -> Self {
+        match err {
+            VKontakteError::API(VKontakteAPIError { error_code: 6, .. }) => Self {
+                error_type: PxollyErrorType::VKontakteLimitsReached,
+                message: None,
+            },
+            VKontakteError::API(VKontakteAPIError { error_code: 9, .. }) => Self {
+                error_type: PxollyErrorType::VKontakteLimitsReached,
+                message: None,
+            },
+            VKontakteError::API(_) => Self {
+                error_type: PxollyErrorType::VKontakteAPIError,
+                message: None,
+            },
+            _ => Self {
+                error_type: PxollyErrorType::InternalServerError,
+                message: None,
+            }
         }
     }
 }

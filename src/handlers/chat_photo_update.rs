@@ -1,5 +1,4 @@
 use crate::pxolly::dispatch::handler::Handler;
-use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::errors::PxollyWebhookError;
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use crate::vkontakte::api::VKontakteAPI;
@@ -8,7 +7,21 @@ use crate::vkontakte::types::params::messages::set_chat_photo::SetChatPhotoParam
 use crate::vkontakte::types::params::photos::get_chat_upload_server::GetChatUploadServerParams;
 use reqwest::multipart::{Form, Part};
 use reqwest::Client;
-use serde_json::Value;
+use serde::Deserialize;
+use crate::pxolly::types::events::event_type::EventType;
+
+#[derive(Debug, Clone, Deserialize)]
+struct UploadPhotoResponse {
+    response: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ChatPhotoUpdateObject {
+    chat_id: String,
+    chat_local_id: Option<u64>,
+    photo_url: String,
+    is_remove: u8,
+}
 
 pub struct ChatPhotoUpdate {
     pub(crate) vkontakte: VKontakteAPI,
@@ -16,15 +29,15 @@ pub struct ChatPhotoUpdate {
 }
 
 impl Handler for ChatPhotoUpdate {
-    const EVENT_TYPE: &'static str = "chat_photo_update";
+    const EVENT_TYPE: EventType = EventType::ChatPhotoUpdate;
+    type EventObject = ChatPhotoUpdateObject;
 
     async fn handle(
         &self,
-        event: PxollyEvent,
+        object: Self::EventObject,
     ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
-        let params = GetChatUploadServerParams {
-            chat_id: event.object.chat_local_id.unwrap() as u64,
-        };
+        let chat_id = object.chat_local_id.ok_or_else(PxollyWebhookError::chat_not_found)?;
+        let params = GetChatUploadServerParams { chat_id };
         let response = self
             .vkontakte
             .photos()
@@ -32,31 +45,23 @@ impl Handler for ChatPhotoUpdate {
             .await?;
         let photo = self
             .http
-            .get(
-                event
-                    .object
-                    .photo_url
-                    .as_ref()
-                    .expect("Expected field `photo_url`"),
-            )
+            .get(&object.photo_url)
             .send()
             .await?
             .bytes()
             .await?;
-        let response = &self
+        let response = self
             .http
             .post(response.upload_url)
             .multipart(Form::new().part("file", Part::stream(photo).file_name("file1.png")))
             .send()
             .await?
-            .json::<Value>()
-            .await?;
-        let body = response["response"]
-            .as_str()
-            .ok_or_else(PxollyWebhookError::internal_server)?;
+            .json::<UploadPhotoResponse>()
+            .await?
+            .response;
         self.vkontakte
             .messages()
-            .set_chat_photo(SetChatPhotoParams { file: body.into() })
+            .set_chat_photo(SetChatPhotoParams { file: response })
             .await?;
 
         Ok(PxollyWebhookResponse::new(true))

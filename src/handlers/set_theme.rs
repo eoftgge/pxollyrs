@@ -1,5 +1,6 @@
+use serde::Deserialize;
 use crate::pxolly::dispatch::handler::Handler;
-use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::events::event_type::EventType;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use crate::vkontakte::api::VKontakteAPI;
@@ -8,20 +9,28 @@ use crate::vkontakte::types::categories::Categories;
 use crate::vkontakte::types::params::messages::set_conversation_style::SetConversationStyleParams;
 use crate::vkontakte::types::responses::VKontakteAPIError;
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct SetThemeObject {
+    chat_id: String,
+    chat_local_id: Option<u64>,
+    style: String,
+}
+
 pub struct SetTheme {
     pub(crate) vkontakte: VKontakteAPI,
 }
 
 impl Handler for SetTheme {
-    const EVENT_TYPE: &'static str = "set_theme";
+    const EVENT_TYPE: EventType = EventType::SetTheme;
+    type EventObject = SetThemeObject;
 
     async fn handle(
         &self,
-        event: PxollyEvent,
+        object: Self::EventObject,
     ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         let params = SetConversationStyleParams {
-            peer_id: (event.object.chat_local_id.unwrap() + 2_000_000_000) as i64,
-            style: event.object.style.unwrap(),
+            peer_id: (object.chat_local_id.ok_or_else(PxollyWebhookError::chat_not_found)? + 2_000_000_000) as i64,
+            style: object.style,
         };
         match self
             .vkontakte

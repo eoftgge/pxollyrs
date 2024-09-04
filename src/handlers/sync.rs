@@ -1,32 +1,40 @@
+use serde::Deserialize;
 use crate::pxolly::dispatch::handler::Handler;
-use crate::pxolly::types::events::PxollyEvent;
+use crate::pxolly::types::events::event_type::EventType;
+use crate::pxolly::types::events::message::PxollyMessage;
+use crate::pxolly::types::events::user::PxollyUser;
 use crate::pxolly::types::responses::errors::PxollyWebhookError;
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use crate::vkontakte::api::VKontakteAPI;
 use crate::vkontakte::types::categories::Categories;
 use crate::vkontakte::types::params::execute::ExecuteParams;
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct SyncObject {
+    chat_id: String,
+    owned_id: u64,
+    user: PxollyUser,
+    message: PxollyMessage,
+    payload: String,
+}
+
 pub struct Sync {
     pub(crate) vkontakte: VKontakteAPI,
 }
 
 impl Handler for Sync {
-    const EVENT_TYPE: &'static str = "sync";
+    const EVENT_TYPE: EventType = EventType::Sync;
+    type EventObject = SyncObject;
 
     async fn handle(
         &self,
-        event: PxollyEvent,
+        object: Self::EventObject,
     ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
-        let message = event
-            .object
-            .message
-            .as_ref()
-            .expect("Expect field: messages");
         let params = serde_json::json!({
-            "conversation_message_id": message.conversation_message_id,
-            "text": message.text,
-            "date": message.date,
-            "from_id": message.from_id
+            "conversation_message_id": object.message.conversation_message_id,
+            "text": object.message.text,
+            "date": object.message.date,
+            "from_id": object.message.from_id
         });
         let peer_id = self
             .vkontakte

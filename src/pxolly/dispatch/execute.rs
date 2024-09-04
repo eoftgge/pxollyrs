@@ -37,9 +37,9 @@ impl<T: Dispatch> Executor<T> {
             });
         }
 
-        let response = self.dispatcher.dispatch(event).await?;
+        let response = self.dispatcher.dispatch(event).await;
         log::debug!("response to the server: {:?}", response);
-        Ok(response)
+        response
     }
 }
 

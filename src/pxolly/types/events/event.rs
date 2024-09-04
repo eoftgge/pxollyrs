@@ -3,6 +3,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct PxollyEvent {
+    #[serde(rename = "type")]
     pub event_type: EventType,
     pub secret_key: String,
     pub event_id: String,

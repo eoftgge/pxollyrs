@@ -2,7 +2,7 @@ use crate::pxolly::errors::PxollyError;
 use crate::pxolly::types::requests::PxollyAPIRequestParams;
 use crate::pxolly::types::responses::api::PxollyAPIResponse;
 use crate::pxolly::DEFAULT_API_URL_PXOLLY;
-use reqwest::header::HeaderValue;
+use reqwest::header::{HeaderValue, CONTENT_TYPE};
 use reqwest::{Client, Response};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -48,7 +48,13 @@ impl PxollyAPI {
             format: "msgpack",
             extras: params,
         };
-        let response = self.client.post(&url).form(&params).send().await?;
+        let body = serde_qs::to_string(&params)?;
+        let response = self.client
+            .post(&url)
+            .header(CONTENT_TYPE, "x-www-form-urlencoded")
+            .body(body)
+            .send()
+            .await?;
         log::debug!(
             "Got a response from @pxolly, content({}): {:?}",
             url,

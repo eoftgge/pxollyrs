@@ -38,17 +38,17 @@ impl VKontakteAPI {
             version: &self.version,
             extras: params,
         };
+        let body = serde_qs::to_string(&params)?;
         let response = self
             .client
             .post(url)
-            .form(&params)
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(body)
             .send()
-            .await?
-            .json::<VKontakteAPIResponse<T>>()
             .await?;
 
         log::debug!("sent the request to VK API, response: {:?}", response);
-
+        let response = response.json::<VKontakteAPIResponse<T>>().await?;
         match response {
             VKontakteAPIResponse::Response(response) => Ok(response),
             VKontakteAPIResponse::Error(error) => {

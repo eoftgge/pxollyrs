@@ -6,6 +6,8 @@ use crate::vkontakte::api::VKontakteAPI;
 use crate::vkontakte::types::categories::Categories;
 use crate::vkontakte::types::params::execute::ExecuteParams;
 use serde::Deserialize;
+use crate::vkontakte::errors::VKontakteError;
+use crate::vkontakte::types::responses::VKontakteAPIError;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct InviteUserObject {
@@ -39,13 +41,18 @@ impl Handler for InviteUser {
                 code: EXECUTE_INVITE_CODE.into(),
                 extras: params,
             })
-            .await?
+            .await
         {
-            -100 => Err(PxollyWebhookError {
+            Ok(-100) => Err(PxollyWebhookError {
                 message: None,
                 error_type: PxollyErrorType::NotInFriends,
             }),
-            _ => Ok(PxollyWebhookResponse::new(true)),
+            Ok(_) => Ok(PxollyWebhookResponse::new(true)),
+            Err(VKontakteError::API(VKontakteAPIError { error_code: 981, .. })) => Err(PxollyWebhookError {
+                message: None,
+                error_type: PxollyErrorType::InvalidPrivacySettingsForInvite,
+            }),
+            _ => Err(PxollyWebhookError::internal_server())
         }
     }
 }

@@ -1,11 +1,13 @@
 use crate::pxolly::dispatch::handler::Handler;
 use crate::pxolly::types::events::event_type::EventType;
-use crate::pxolly::types::responses::errors::PxollyWebhookError;
+use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use crate::vkontakte::api::VKontakteAPI;
 use crate::vkontakte::types::categories::Categories;
 use crate::vkontakte::types::params::messages::reset_conversation_style::ResetConversationStyleParams;
 use serde::Deserialize;
+use crate::vkontakte::errors::VKontakteError;
+use crate::vkontakte::types::responses::VKontakteAPIError;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ResetThemeObject {
@@ -29,12 +31,29 @@ impl Handler for ResetTheme {
             .chat_local_id
             .ok_or_else(PxollyWebhookError::chat_not_found)?
             + 2_000_000_000;
-        self.vkontakte
+        match self.vkontakte
             .messages()
             .reset_conversation_style(ResetConversationStyleParams {
                 peer_id: peer_id as i64,
             })
-            .await?;
-        Ok(PxollyWebhookResponse::new(true))
+            .await {
+            Ok(_) => Ok(PxollyWebhookResponse::new(true)),
+            Err(VKontakteError::API(VKontakteAPIError {
+                                        error_code: 966, ..
+                                    })) => Err(PxollyWebhookError {
+                message: None,
+                error_type: PxollyErrorType::VKontakteAPIError,
+            }),
+            Err(VKontakteError::API(VKontakteAPIError {
+                                        error_code: 3, ..
+                                    })) => Err(PxollyWebhookError {
+                message: Some("Возможно, вебхук не имеет доступа к этому методу.".into()),
+                error_type: PxollyErrorType::BotAccessDenied,
+            }),
+            _ => Err(PxollyWebhookError {
+                message: None,
+                error_type: PxollyErrorType::VKontakteAPIError,
+            }),
+        }
     }
 }

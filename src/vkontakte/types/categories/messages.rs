@@ -22,7 +22,7 @@ impl MessagesMethods {
         &self,
         params: MessagesDeleteParams,
     ) -> Result<MessagesDeleteResponse, VKontakteError> {
-        self.api_client.api_request("message.delete", params).await
+        self.api_client.api_request("messages.delete", params).await
     }
 
     pub async fn reset_conversation_style(

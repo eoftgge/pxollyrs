@@ -1,8 +1,8 @@
 use crate::pxolly::dispatch::handler::Handler;
-use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use std::future::Future;
+use crate::pxolly::types::events::event::PxollyEvent;
 
 pub trait Dispatch: Send + Sync + 'static {
     fn dispatch(
@@ -43,7 +43,17 @@ where
     ) -> Result<PxollyWebhookResponse, PxollyWebhookError> {
         let event_type = Current::EVENT_TYPE;
         if event.event_type == event_type {
-            return self.current.handle(event).await;
+            let object = match event.object.deserialize_into() {
+                Ok(t) => t,
+                Err(err) => {
+                    log::error!("Failed to deserialize object: {:?}", err);
+                    return Err(PxollyWebhookError {
+                        message: Some(err.to_string()),
+                        error_type: PxollyErrorType::InternalServerError,
+                    })
+                }
+            };
+            return self.current.handle(object).await;
         }
         self.tail.dispatch(event).await
     }

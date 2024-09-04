@@ -1,13 +1,14 @@
-use crate::pxolly::types::events::PxollyEvent;
 use crate::pxolly::types::responses::errors::PxollyWebhookError;
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use std::future::Future;
+use crate::pxolly::types::events::event_type::EventType;
 
 pub trait Handler: Send + Sync + 'static {
-    const EVENT_TYPE: &'static str;
+    const EVENT_TYPE: EventType;
+    type EventObject;
 
     fn handle(
         &self,
-        event: PxollyEvent,
+        object: Self::EventObject,
     ) -> impl Future<Output = Result<PxollyWebhookResponse, PxollyWebhookError>> + Send + Sync;
 }

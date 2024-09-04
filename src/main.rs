@@ -11,7 +11,7 @@ use pxollyrs::pxolly::DEFAULT_VERSION_PXOLLY;
 use pxollyrs::vkontakte::api::VKontakteAPI;
 
 #[tokio::main]
-async fn main() -> Result<(), pxollyrs::errors::WebhookError> {
+async fn main() -> anyhow::Result<()> {
     let config = WebhookConfig::new().await?;
     config.application().logger().set_level();
 
@@ -43,9 +43,10 @@ async fn main() -> Result<(), pxollyrs::errors::WebhookError> {
     log::info!("Server is starting! (addr: {}; host: {})", addr, host);
 
     let server = axum::serve(listener, app);
-    let (_, _) = tokio::join!(
-        async move { server.await.unwrap() }, 
+    let (result, _): (anyhow::Result<()>, ()) = tokio::join!(
+        async move { Ok(server.await?) }, 
         auto_bind(pxolly_client, config.application().is_bind, secret_key, host.into(), url)
     );
-    Ok(())
+    
+    result
 }

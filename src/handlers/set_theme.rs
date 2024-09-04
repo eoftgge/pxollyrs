@@ -48,12 +48,12 @@ impl Handler for SetTheme {
                 message: None,
                 error_type: PxollyErrorType::BotAccessDenied,
             }),
-            Err(VKontakteError::API(VKontakteAPIError {
-                error_code: 3, ..
-            })) => Err(PxollyWebhookError {
-                message: Some("Возможно, вебхук не имеет доступа к этому методу.".into()),
-                error_type: PxollyErrorType::BotAccessDenied,
-            }),
+            Err(VKontakteError::API(VKontakteAPIError { error_code: 3, .. })) => {
+                Err(PxollyWebhookError {
+                    message: Some("Возможно, вебхук не имеет доступа к этому методу.".into()),
+                    error_type: PxollyErrorType::BotAccessDenied,
+                })
+            }
             _ => Err(PxollyWebhookError {
                 message: None,
                 error_type: PxollyErrorType::VKontakteAPIError,

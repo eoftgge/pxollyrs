@@ -51,7 +51,7 @@ impl VKontakteAPI {
         log::debug!("sent the request to VK API, response: {:?}", response);
         match response {
             VKontakteAPIResponse::Response(response) => Ok(response),
-            VKontakteAPIResponse::Error(error) => Err(VKontakteError::API(error))
+            VKontakteAPIResponse::Error(error) => Err(VKontakteError::API(error)),
         }
     }
 }

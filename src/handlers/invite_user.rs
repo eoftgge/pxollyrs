@@ -3,11 +3,11 @@ use crate::pxolly::types::events::event_type::EventType;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use crate::vkontakte::api::VKontakteAPI;
+use crate::vkontakte::errors::VKontakteError;
 use crate::vkontakte::types::categories::Categories;
 use crate::vkontakte::types::params::execute::ExecuteParams;
-use serde::Deserialize;
-use crate::vkontakte::errors::VKontakteError;
 use crate::vkontakte::types::responses::VKontakteAPIError;
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct InviteUserObject {
@@ -48,11 +48,13 @@ impl Handler for InviteUser {
                 error_type: PxollyErrorType::NotInFriends,
             }),
             Ok(_) => Ok(PxollyWebhookResponse::new(true)),
-            Err(VKontakteError::API(VKontakteAPIError { error_code: 981, .. })) => Err(PxollyWebhookError {
+            Err(VKontakteError::API(VKontakteAPIError {
+                error_code: 981, ..
+            })) => Err(PxollyWebhookError {
                 message: None,
                 error_type: PxollyErrorType::InvalidPrivacySettingsForInvite,
             }),
-            _ => Err(PxollyWebhookError::internal_server())
+            _ => Err(PxollyWebhookError::internal_server()),
         }
     }
 }

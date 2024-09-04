@@ -22,7 +22,7 @@ pub async fn run_migration_chat_ids(api: PxollyAPI) {
             }
             return;
         }
-        
+
         log::info!("Content file: {:?}", models);
         let mut chat_local_ids = HashMap::new();
         for model in models {

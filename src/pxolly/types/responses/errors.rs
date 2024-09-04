@@ -1,6 +1,6 @@
 use crate::vkontakte::errors::VKontakteError;
-use serde::{Deserialize, Serialize};
 use crate::vkontakte::types::responses::VKontakteAPIError;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PxollyWebhookError {
@@ -69,7 +69,7 @@ impl From<VKontakteError> for PxollyWebhookError {
             _ => Self {
                 error_type: PxollyErrorType::InternalServerError,
                 message: None,
-            }
+            },
         }
     }
 }

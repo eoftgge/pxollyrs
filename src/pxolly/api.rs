@@ -12,14 +12,19 @@ use std::sync::Arc;
 async fn into_response<T: DeserializeOwned + Debug>(
     response: Response,
 ) -> Result<PxollyAPIResponse<T>, PxollyError> {
-    let content_type = response.headers().get("Content-Type");
+    let content_type = response.headers().get("Content-Type").cloned();
+    let url = response.url().clone();
+    let response = response.bytes().await?;
+    log::debug!(
+        "Got a response from @pxolly, content({}): {:?}",
+        url,
+        String::from_utf8_lossy(&response),
+    );
 
-    if content_type.eq(&Some(&HeaderValue::from_static("application/x-msgpack"))) {
-        let bytes = response.bytes().await?;
-        Ok(rmp_serde::from_slice(&bytes)?)
+    if content_type.eq(&Some(HeaderValue::from_static("application/x-msgpack"))) {
+        Ok(rmp_serde::from_slice(&response)?)
     } else {
-        let bytes = response.bytes().await?;
-        Ok(serde_json::from_slice(&bytes)?)
+        Ok(serde_json::from_slice(&response)?)
     }
 }
 
@@ -57,11 +62,6 @@ impl PxollyAPI {
             .send()
             .await?;
         let response = into_response(response).await?;
-        log::debug!(
-            "Got a response from @pxolly, content({}): {:?}",
-            url,
-            response
-        );
         match response {
             PxollyAPIResponse::Response(ok) => Ok(ok),
             PxollyAPIResponse::Error(err) => Err(PxollyError::API(err)),

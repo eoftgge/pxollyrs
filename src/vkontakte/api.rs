@@ -45,10 +45,11 @@ impl VKontakteAPI {
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body(body)
             .send()
+            .await?
+            .text()
             .await?;
-
-        let response = response.json::<VKontakteAPIResponse<T>>().await?;
         log::debug!("sent the request to VK API, response: {:?}", response);
+        let response = serde_json::from_str::<VKontakteAPIResponse<T>>(response.as_str())?;
         match response {
             VKontakteAPIResponse::Response(response) => Ok(response),
             VKontakteAPIResponse::Error(error) => Err(VKontakteError::API(error)),

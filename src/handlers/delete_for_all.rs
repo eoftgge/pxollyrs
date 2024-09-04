@@ -40,18 +40,19 @@ impl Handler for DeleteForAll {
         let response = match response {
             Ok(res) => res,
             Err(VKontakteError::API(VKontakteAPIError {
-                                        error_code: 924, ..
-                                    })) => {
+                error_code: 924, ..
+            })) => {
                 return Err(PxollyWebhookError {
                     message: Some("не удалось удалить сообщения".into()),
                     error_type: PxollyErrorType::BotAccessDenied,
                 })
             }
-            Err(_) =>
+            Err(_) => {
                 return Err(PxollyWebhookError {
                     message: Some("неизвестная ошибка...".into()),
                     error_type: PxollyErrorType::VKontakteAPIError,
                 })
+            }
         };
 
         let mut cmids = Vec::new();

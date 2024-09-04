@@ -14,6 +14,15 @@ pub async fn run_migration_chat_ids(api: PxollyAPI) {
     if let Ok(file) = std::fs::File::open("chat.json") {
         log::info!("The file `chat.json` is exists... Running migration...");
         let models: Vec<ChatModel> = serde_json::from_reader(file).unwrap();
+        if models.is_empty() {
+            log::info!("The file is empty. Migrate is stopped");
+            log::info!("Deleting a file...");
+            if let Err(err) = std::fs::remove_file("chat.json") {
+                log::error!("Failed deleting file: {}", err);
+            }
+            return;
+        }
+        
         log::info!("Content file: {:?}", models);
         let mut chat_local_ids = HashMap::new();
         for model in models {

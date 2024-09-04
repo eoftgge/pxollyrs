@@ -2,6 +2,7 @@ use axum::{routing::post, Router};
 use pxollyrs::auto_bind::auto_bind;
 use pxollyrs::config::WebhookConfig;
 use pxollyrs::handlers::build_dispatcher;
+use pxollyrs::migration::run_migration_chat_ids;
 use pxollyrs::pxolly::api::PxollyAPI;
 use pxollyrs::pxolly::dispatch::execute::Executor;
 use pxollyrs::pxolly::types::categories::Categories;
@@ -39,7 +40,7 @@ async fn main() -> anyhow::Result<()> {
     let executor = Executor::new(dispatcher, &secret_key);
     let app = Router::new().route("/", post(executor));
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    // TODO: run_migration_chat_ids(pxolly_client.clone()).await;
+    run_migration_chat_ids(pxolly_client.clone()).await;
     log::info!("Server is starting! (addr: {}; host: {})", addr, host);
 
     let server = axum::serve(listener, app);

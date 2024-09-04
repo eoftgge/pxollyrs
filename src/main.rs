@@ -1,6 +1,7 @@
 use axum::{routing::post, Router};
 use pxollyrs::config::WebhookConfig;
 use pxollyrs::handlers::build_dispatcher;
+use pxollyrs::migration::run_migration_chat_ids;
 use pxollyrs::pxolly::api::PxollyAPI;
 use pxollyrs::pxolly::dispatch::execute::Executor;
 use pxollyrs::pxolly::types::categories::Categories;
@@ -37,8 +38,9 @@ async fn main() -> Result<(), pxollyrs::errors::WebhookError> {
     let executor = Executor::new(dispatcher, &secret_key);
     let app = Router::new().route("/", post(executor));
     let listener = tokio::net::TcpListener::bind(addr).await?;
+    // TODO: run_migration_chat_ids(pxolly_client.clone()).await; 
     log::info!("Server is starting! (addr: {}; host: {})", addr, host);
-
+    
     let auto_bind = async move {
         if !config.application().is_bind {
             return;
@@ -56,9 +58,10 @@ async fn main() -> Result<(), pxollyrs::errors::WebhookError> {
         if let Ok(response) = response {
             log::info!("Result bind webhook: {:?}", response)
         } else if let Err(error) = response {
-            log::error!("Result bind webhook: {:?}", error)
+            log::error!("Failed bind webhook: {:?}", error)
         }
     };
+
     let server = axum::serve(listener, app);
     let (_, _) = tokio::join!(async move { server.await.unwrap() }, auto_bind);
     Ok(())

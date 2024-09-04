@@ -3,5 +3,5 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ImportChatLocalIdsParams {
-    chat_local_ids: HashMap<String, u64>,
+    pub(crate) chat_local_ids: HashMap<String, u64>,
 }

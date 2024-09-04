@@ -28,6 +28,13 @@ pub enum PxollyErrorType {
 }
 
 impl PxollyWebhookError {
+    pub fn chat_not_found() -> Self {
+        Self {
+            message: None,
+            error_type: PxollyErrorType::ChatNotFound,
+        }
+    }
+    
     pub fn internal_server() -> Self {
         Self {
             message: None,

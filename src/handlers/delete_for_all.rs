@@ -3,11 +3,11 @@ use crate::pxolly::types::events::event_type::EventType;
 use crate::pxolly::types::responses::errors::{PxollyErrorType, PxollyWebhookError};
 use crate::pxolly::types::responses::webhook::PxollyWebhookResponse;
 use crate::vkontakte::api::VKontakteAPI;
+use crate::vkontakte::errors::VKontakteError;
 use crate::vkontakte::types::categories::Categories;
 use crate::vkontakte::types::params::messages::delete::MessagesDeleteParams;
-use serde::Deserialize;
-use crate::vkontakte::errors::VKontakteError;
 use crate::vkontakte::types::responses::VKontakteAPIError;
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DeleteForAllObject {
@@ -39,7 +39,9 @@ impl Handler for DeleteForAll {
         let response = self.vkontakte.messages().delete(params).await;
         let response = match response {
             Ok(res) => res,
-            Err(VKontakteError::API(VKontakteAPIError { error_code: 924, .. })) => {
+            Err(VKontakteError::API(VKontakteAPIError {
+                error_code: 924, ..
+            })) => {
                 return Err(PxollyWebhookError {
                     message: Some("не удалось удалить сообщения".into()),
                     error_type: PxollyErrorType::BotAccessDenied,
@@ -50,7 +52,7 @@ impl Handler for DeleteForAll {
                 return Err(PxollyWebhookError {
                     message: Some("неизвестная ошибка...".into()),
                     error_type: PxollyErrorType::VKontakteAPIError,
-                })
+                });
             }
         };
 

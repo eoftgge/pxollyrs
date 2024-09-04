@@ -1,7 +1,7 @@
+use crate::pxolly::types::responses::errors::PxollyWebhookError;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use serde::Serialize;
-use crate::pxolly::types::responses::errors::PxollyWebhookError;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "snake_case")]

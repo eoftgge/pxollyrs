@@ -39,14 +39,20 @@ async fn main() -> anyhow::Result<()> {
     let executor = Executor::new(dispatcher, &secret_key);
     let app = Router::new().route("/", post(executor));
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    // TODO: run_migration_chat_ids(pxolly_client.clone()).await; 
+    // TODO: run_migration_chat_ids(pxolly_client.clone()).await;
     log::info!("Server is starting! (addr: {}; host: {})", addr, host);
 
     let server = axum::serve(listener, app);
     let (result, _): (anyhow::Result<()>, ()) = tokio::join!(
-        async move { Ok(server.await?) }, 
-        auto_bind(pxolly_client, config.application().is_bind, secret_key, host.into(), url)
+        async move { Ok(server.await?) },
+        auto_bind(
+            pxolly_client,
+            config.application().is_bind,
+            secret_key,
+            host.into(),
+            url
+        )
     );
-    
+
     result
 }

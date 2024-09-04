@@ -1,7 +1,11 @@
 use crate::pxolly::api::PxollyAPI;
 use crate::pxolly::errors::PxollyError;
-use crate::pxolly::types::params::{EditSettingsParams, GetSettingsParams, ImportChatLocalIdsParams};
-use crate::pxolly::types::responses::callback::{EditSettingsResponse, GetSettingsResponse, ImportChatLocalIdsResponse};
+use crate::pxolly::types::params::{
+    EditSettingsParams, GetSettingsParams, ImportChatLocalIdsParams,
+};
+use crate::pxolly::types::responses::callback::{
+    EditSettingsResponse, GetSettingsResponse, ImportChatLocalIdsResponse,
+};
 
 pub struct CallbackMethods {
     api_client: PxollyAPI,
@@ -29,8 +33,11 @@ impl CallbackMethods {
             .api_request("callback.getSettings", params)
             .await
     }
-    
-    pub async fn import_chat_local_ids(&self, params: ImportChatLocalIdsParams) -> Result<ImportChatLocalIdsResponse, PxollyError> {
+
+    pub async fn import_chat_local_ids(
+        &self,
+        params: ImportChatLocalIdsParams,
+    ) -> Result<ImportChatLocalIdsResponse, PxollyError> {
         self.api_client
             .api_request("callback.importChatLocalIds", params)
             .await

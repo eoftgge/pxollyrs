@@ -1,8 +1,8 @@
-use std::collections::HashMap;
-use serde::Deserialize;
 use crate::pxolly::api::PxollyAPI;
 use crate::pxolly::types::categories::Categories;
 use crate::pxolly::types::params::ImportChatLocalIdsParams;
+use serde::Deserialize;
+use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
 struct ChatModel {
@@ -21,7 +21,7 @@ pub async fn run_migration_chat_ids(api: PxollyAPI) {
         }
         let params = ImportChatLocalIdsParams { chat_local_ids };
         let result = api.callback().import_chat_local_ids(params).await;
-        
+
         match result {
             Ok(_) => {
                 log::info!("Successfully imported chat! Deleting a file...");

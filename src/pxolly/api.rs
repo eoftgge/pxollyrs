@@ -49,7 +49,8 @@ impl PxollyAPI {
             extras: params,
         };
         let body = serde_qs::to_string(&params)?;
-        let response = self.client
+        let response = self
+            .client
             .post(&url)
             .header(CONTENT_TYPE, "x-www-form-urlencoded")
             .body(body)
